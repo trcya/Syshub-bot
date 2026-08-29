@@ -1,10 +1,18 @@
 const { Events, EmbedBuilder } = require('discord.js');
 const { updateStats } = require('../utils/statsManager');
 
+const recentlyProcessed = new Map();
+const COOLDOWN_MS = 10000;
+
 module.exports = {
     name: Events.GuildMemberAdd,
     async execute(member) {
-        // Update stats
+        const now = Date.now();
+        const lastProcessed = recentlyProcessed.get(member.id);
+        if (lastProcessed && now - lastProcessed < COOLDOWN_MS) return;
+        recentlyProcessed.set(member.id, now);
+        setTimeout(() => recentlyProcessed.delete(member.id), COOLDOWN_MS);
+
         updateStats(member.client);
         console.log(`New member detected: ${member.user.tag} in guild: ${member.guild.id}`);
         

@@ -11,6 +11,7 @@ const client = new Client({
         GatewayIntentBits.GuildMembers,
         GatewayIntentBits.GuildMessageReactions,
     ],
+    componentsV2: true,
 });
 
 client.commands = new Collection();
