@@ -2,10 +2,10 @@ const { Events } = require('discord.js');
 
 const STICKY_CHANNELS = {
     '1494149400052633671': {
-        content: 'Tutorial <#1543498645339635793>'
+        content: 'Tutorial <#1543492628866400358>'
     },
     '1494149497360617553': {
-        content: 'Tutorial <#1543498645339635793>'
+        content: 'Tutorial <#1543492628866400358>'
     }
 };
 
