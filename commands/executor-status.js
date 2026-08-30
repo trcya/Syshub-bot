@@ -34,7 +34,7 @@ module.exports = {
                         },
                         {
                             type: 10,
-                            content: `> [Velocity](https://realvelocity.xyz/): ${yellow}\n> [Madium](https://getmadium.net/): ${green}\n> [Real](https://realest.gg): ${green}`
+                            content: `> [Velocity](https://realvelocity.xyz/): ${green}\n> [Madium](https://getmadium.net/): ${green}\n> [Real](https://realest.gg): ${green}`
                         },
                         {
                             type: 14,
