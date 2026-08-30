@@ -33,6 +33,7 @@ module.exports = {
             .setColor('#2F3136')
             .setTitle('👋 Welcome to the Server!')
             .setDescription(`Welcome <@${member.id}> to **${member.guild.name}**!\nWe are glad to have you here.`)
+            .setImage('attachment://syshub.jpg')
             .setThumbnail(member.user.displayAvatarURL({ dynamic: true, size: 256 }))
             .addFields(
                 { name: '👤 Username', value: `${member.user.tag}`, inline: true },
@@ -42,7 +43,11 @@ module.exports = {
             .setFooter({ text: `Total Members: ${member.guild.memberCount}`, iconURL: member.guild.iconURL() })
             .setTimestamp();
 
-        channel.send({ content: `Hey <@${member.id}>, welcome!`, embeds: [welcomeEmbed] });
+        channel.send({
+            content: `Hey <@${member.id}>, welcome!`,
+            files: [{ attachment: path.join(__dirname, '..', 'syshub.jpg'), name: 'syshub.jpg' }],
+            embeds: [welcomeEmbed]
+        });
 
         try {
             await member.send({

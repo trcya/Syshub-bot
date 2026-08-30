@@ -1,4 +1,5 @@
 const { Events, EmbedBuilder } = require('discord.js');
+const path = require('path');
 const { updateStats } = require('../utils/statsManager');
 
 const recentlyProcessed = new Map();
@@ -31,6 +32,7 @@ module.exports = {
             .setColor('#ED4245')
             .setTitle('😢 Goodbye!')
             .setDescription(`**${member.user.tag}** has left the server.\nWe hope to see you again!`)
+            .setImage('attachment://syshub.jpg')
             .setThumbnail(member.user.displayAvatarURL({ dynamic: true, size: 256 }))
             .addFields(
                 { name: '👤 Username', value: `${member.user.tag}`, inline: true },
@@ -39,6 +41,9 @@ module.exports = {
             .setFooter({ text: `Total Members: ${member.guild.memberCount}`, iconURL: member.guild.iconURL() })
             .setTimestamp();
 
-        channel.send({ embeds: [goodbyeEmbed] });
+        channel.send({
+            files: [{ attachment: path.join(__dirname, '..', 'syshub.jpg'), name: 'syshub.jpg' }],
+            embeds: [goodbyeEmbed]
+        });
     },
 };
