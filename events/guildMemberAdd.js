@@ -41,5 +41,34 @@ module.exports = {
             .setTimestamp();
 
         channel.send({ content: `Hey <@${member.id}>, welcome!`, embeds: [welcomeEmbed] });
+
+        try {
+            await member.send({
+                embeds: [
+                    new EmbedBuilder()
+                        .setColor('#2F3136')
+                        .setTitle('👋 Welcome to SysHub!')
+                        .setDescription('Thanks for joining! Here is what you need to know:')
+                        .addFields(
+                            {
+                                name: '✅ Verify',
+                                value: `Verify in <#1504478063386165392> to access the server.`
+                            },
+                            {
+                                name: '📦 Free Scripts',
+                                value: `Once verified, grab free scripts in <#1494146608026353714>.`
+                            },
+                            {
+                                name: '💎 Premium',
+                                value: `Want premium? Open a ticket in <#1494149019864137780> or visit [syshub.site](https://syshub.site).`
+                            }
+                        )
+                        .setTimestamp()
+                        .setFooter({ text: 'SysHub' })
+                ]
+            });
+        } catch {
+            console.log(`Could not DM ${member.user.tag} (DMs might be disabled).`);
+        }
     },
 };
