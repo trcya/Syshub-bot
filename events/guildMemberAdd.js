@@ -1,4 +1,5 @@
 const { Events, EmbedBuilder } = require('discord.js');
+const path = require('path');
 const { updateStats } = require('../utils/statsManager');
 
 const recentlyProcessed = new Map();
@@ -44,11 +45,18 @@ module.exports = {
 
         try {
             await member.send({
+                files: [
+                    {
+                        attachment: path.join(__dirname, '..', 'syshub.jpg'),
+                        name: 'syshub.jpg'
+                    }
+                ],
                 embeds: [
                     new EmbedBuilder()
                         .setColor('#2F3136')
                         .setTitle('👋 Welcome to SysHub!')
                         .setDescription('Terima kasih sudah join! Berikut yang perlu kamu ketahui:\nThanks for joining! Here is what you need to know:')
+                        .setImage('attachment://syshub.jpg')
                         .addFields(
                             {
                                 name: '✅ Verify',
