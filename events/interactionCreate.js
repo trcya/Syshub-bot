@@ -1,4 +1,5 @@
 const { Events, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, PermissionFlagsBits, ChannelType, ModalBuilder, TextInputBuilder, TextInputStyle } = require('discord.js');
+const { getEmbed, getButtons } = require('../utils/welcomeEmbed');
 
 module.exports = {
     name: Events.InteractionCreate,
@@ -20,6 +21,15 @@ module.exports = {
         // --- HANDLE BUTTONS ---
         if (interaction.isButton()) {
             const { customId, guild, user, channel, member } = interaction;
+
+            if (customId === 'lang_id' || customId === 'lang_en') {
+                const lang = customId === 'lang_id' ? 'id' : 'en';
+                return interaction.update({
+                    embeds: [getEmbed(lang)],
+                    components: [getButtons(lang)]
+                });
+            }
+
             const logChannel = guild.channels.cache.get(process.env.TICKET_LOG_CHANNEL_ID);
             const staffId = process.env.MIDMAN_STAFF_ID;
 
