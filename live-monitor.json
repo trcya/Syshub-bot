@@ -1,0 +1,38 @@
+[
+  {
+    "platform": "tiktok",
+    "handle": "syshub969",
+    "contentType": "live",
+    "discordChannelId": "1494148813441732750",
+    "guildId": "",
+    "lastStreamId": null,
+    "offlineCount": 0
+  },
+  {
+    "platform": "tiktok",
+    "handle": "syshub.site",
+    "contentType": "live",
+    "discordChannelId": "1494148813441732750",
+    "guildId": "",
+    "lastStreamId": null,
+    "offlineCount": 0
+  },
+  {
+    "platform": "tiktok",
+    "handle": "syshub969",
+    "contentType": "videos",
+    "discordChannelId": "1494148923013595156",
+    "guildId": "",
+    "lastStreamId": null,
+    "offlineCount": 0
+  },
+  {
+    "platform": "tiktok",
+    "handle": "syshub.site",
+    "contentType": "videos",
+    "discordChannelId": "1494148923013595156",
+    "guildId": "",
+    "lastStreamId": null,
+    "offlineCount": 0
+  }
+]
