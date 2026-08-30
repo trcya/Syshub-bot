@@ -1,3 +1,5 @@
 node_modules/
 .env
+.env.local
 package-lock.json
+executor_status_msg_id.txt
