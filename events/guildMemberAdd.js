@@ -48,19 +48,19 @@ module.exports = {
                     new EmbedBuilder()
                         .setColor('#2F3136')
                         .setTitle('👋 Welcome to SysHub!')
-                        .setDescription('Thanks for joining! Here is what you need to know:')
+                        .setDescription('Terima kasih sudah join! Berikut yang perlu kamu ketahui:\nThanks for joining! Here is what you need to know:')
                         .addFields(
                             {
                                 name: '✅ Verify',
-                                value: `Verify in <#1504478063386165392> to access the server.`
+                                value: `> 🇮🇩 Verifikasi di <#1504478063386165392> untuk mengakses server.\n> 🇬🇧 Verify in <#1504478063386165392> to access the server.`
                             },
                             {
                                 name: '📦 Free Scripts',
-                                value: `Once verified, grab free scripts in <#1494146608026353714>.`
+                                value: `> 🇮🇩 Setelah verifikasi, ambil script gratis di <#1494146608026353714>.\n> 🇬🇧 Once verified, grab free scripts in <#1494146608026353714>.`
                             },
                             {
                                 name: '💎 Premium',
-                                value: `Want premium? Open a ticket in <#1494149019864137780> or visit [syshub.site](https://syshub.site).`
+                                value: `> 🇮🇩 Mau premium? Buka ticket di <#1494149019864137780> atau kunjungi [syshub.site](https://syshub.site).\n> 🇬🇧 Want premium? Open a ticket in <#1494149019864137780> or visit [syshub.site](https://syshub.site).`
                             }
                         )
                         .setTimestamp()
