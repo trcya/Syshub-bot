@@ -1,12 +1,31 @@
-const { Events } = require('discord.js');
+const { Events, EmbedBuilder } = require('discord.js');
+
+function getStickyEmbed() {
+    return new EmbedBuilder()
+        .setColor('#2F3136')
+        .setTitle('📌 Informasi Penting')
+        .setDescription('Selamat datang di **SysHub**! Silakan akses channel di bawah ini:')
+        .addFields(
+            {
+                name: '📖 Tutorial',
+                value: '> Lihat panduan di <#1543492628866400358>'
+            },
+            {
+                name: '📥 Get Free Script',
+                value: '> Ambil script gratis di <#1494146608026353714>'
+            },
+            {
+                name: '💎 Buy Premium',
+                value: '> Beli premium di <#1494149019864137780> atau kunjungi [syshub.site](https://syshub.site)'
+            }
+        )
+        .setTimestamp()
+        .setFooter({ text: 'SysHub' });
+}
 
 const STICKY_CHANNELS = {
-    '1494149400052633671': {
-        content: '📖 Tutorial <#1543492628866400358>\n📥 Get Free Script <#1494146608026353714>\n💎 Buy Premium <#1494149019864137780>'
-    },
-    '1494149497360617553': {
-        content: '📖 Tutorial <#1543492628866400358>\n📥 Get Free Script <#1494146608026353714>\n💎 Buy Premium <#1494149019864137780>'
-    }
+    '1494149400052633671': true,
+    '1494149497360617553': true
 };
 
 const lastStickyMessage = new Map();
@@ -16,8 +35,7 @@ module.exports = {
     async execute(message) {
         if (message.author.bot || !message.guild) return;
 
-        const sticky = STICKY_CHANNELS[message.channel.id];
-        if (!sticky) return;
+        if (!STICKY_CHANNELS[message.channel.id]) return;
 
         try {
             const oldMsgId = lastStickyMessage.get(message.channel.id);
@@ -26,7 +44,7 @@ module.exports = {
                 if (oldMsg) await oldMsg.delete().catch(() => {});
             }
 
-            const newMsg = await message.channel.send({ content: sticky.content });
+            const newMsg = await message.channel.send({ embeds: [getStickyEmbed()] });
             lastStickyMessage.set(message.channel.id, newMsg.id);
         } catch {}
     },
