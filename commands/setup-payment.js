@@ -1,4 +1,7 @@
-const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, PermissionFlagsBits } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, PermissionFlagsBits, AttachmentBuilder } = require('discord.js');
+const path = require('path');
+
+const LOGO_PATH = path.join(__dirname, '..', 'logo.png');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -13,42 +16,43 @@ module.exports = {
         const channel = interaction.options.getChannel('channel') || interaction.channel;
         
         const embed = new EmbedBuilder()
-            .setTitle('💳 SysHub Payment & Purchase')
-            .setColor('#5865F2')
+            .setColor('#2F3136')
+            .setAuthor({
+                name: 'SysHub',
+                icon_url: 'attachment://logo.png'
+            })
+            .setTitle('❤️ Support SysHub / Donation')
             .setDescription(
-                'Welcome to the official **SysHub Payment & Purchase** center. You can securely support SysHub, purchase premium features, or pay for services using our SociaBuzz link below.\n\n' +
-                '**Supported Payment Methods:**\n' +
-                '• 📱 E-Wallet (Dana, OVO, GoPay, LinkAja, ShopeePay)\n' +
-                '• 🧾 QRIS (Scan & Pay)\n' +
-                '• 🏦 Bank Transfer / Virtual Account'
+                'Support our development and keep the servers running by donating. Your contributions help us maintain and improve our services!'
             )
+            .setThumbnail('attachment://logo.png')
             .addFields(
                 {
-                    name: '📋 How to Pay / Purchase',
-                    value: '1. Click the **Pay via SociaBuzz** button below.\n' +
-                           '2. Enter the amount and fill in your details.\n' +
-                           '3. **IMPORTANT:** Write your Discord Username/ID in the donation message/note so we can identify you!\n' +
-                           '4. Complete the payment.\n' +
-                           '5. Keep your payment proof/receipt for verification.'
+                    name: 'Why Support Us?',
+                    value: '• Helps cover server hosting and maintenance costs\n• Direct support for future updates and new features\n• Keeps SysHub active and reliable'
                 },
                 {
-                    name: '⚠️ Verification & Support',
-                    value: 'After completing the payment, please open a support/midman ticket or contact a staff member with your receipt to claim your purchase.'
+                    name: 'How to Donate:',
+                    value: 'Click the **Support Us via SociaBuzz** button below to donate using E-Wallet, QRIS, or Bank Transfer.'
                 }
             )
-            .setFooter({ text: 'SysHub Payment System' })
+            .setFooter({
+                text: 'SysHub Donation System',
+                icon_url: 'attachment://logo.png'
+            })
             .setTimestamp();
 
         const row = new ActionRowBuilder()
             .addComponents(
                 new ButtonBuilder()
-                    .setLabel('Pay / Purchase via SociaBuzz')
+                    .setLabel('Support Us via SociaBuzz')
                     .setURL('https://sociabuzz.com/syshub/give')
-                    .setEmoji('💳')
+                    .setEmoji('❤️')
                     .setStyle(ButtonStyle.Link),
             );
 
-        await channel.send({ embeds: [embed], components: [row] });
-        await interaction.reply({ content: `Payment Panel has been sent to ${channel}!`, ephemeral: true });
+        const logoFile = new AttachmentBuilder(LOGO_PATH, { name: 'logo.png' });
+        await channel.send({ embeds: [embed], components: [row], files: [logoFile] });
+        await interaction.reply({ content: `Donation Panel has been sent to ${channel}!`, ephemeral: true });
     },
 };
