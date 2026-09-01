@@ -58,7 +58,8 @@ module.exports = {
     async execute(message) {
         if (message.author.bot || !message.guild) return;
 
-        if (!STICKY_CHANNELS[message.channel.id]) return;
+        const sticky = STICKY_CHANNELS[message.channel.id];
+        if (!sticky) return;
 
         try {
             const oldMsgId = lastStickyMessage.get(message.channel.id);
