@@ -46,7 +46,7 @@ function buildStatusBody() {
                     },
                     {
                         type: 10,
-                        content: `> [Velocity](https://realvelocity.xyz/): ${green}\n> [Madium](https://getmadium.net/): ${green}\n> [Real](https://realest.gg): ${green}`
+                        content: `> [Velocity](https://realvelocity.xyz/): ${green}\n> [Madium](https://getmadium.net/): ${purple}\n> [Real](https://realest.gg): ${green} (Recomended)`
                     },
                     {
                         type: 14,
