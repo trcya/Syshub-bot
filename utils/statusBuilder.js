@@ -120,7 +120,7 @@ function buildStatusBody() {
                     },
                     {
                         type: 10,
-                        content: `[Support Executor](https://realvelocity.xyz/)`
+                        content: `-# TEXT BIRU BISA DI CLICK DAN AKAN MENGARAH KE WEBSITE OFFICIAL EXECUTOR TERSEBUT`
                     }
                 ]
             }
