@@ -8,7 +8,7 @@ function getSavedMessageId() {
         if (fs.existsSync(MSG_ID_FILE)) {
             return fs.readFileSync(MSG_ID_FILE, 'utf-8').trim();
         }
-    } catch {}
+    } catch { }
     return null;
 }
 
@@ -20,6 +20,7 @@ function buildStatusBody() {
     const green = '🟢';
     const yellow = '🟡';
     const red = '🔴';
+    const purple = '🟣';
 
     const now = new Date();
     const timestamp = `<t:${Math.floor(now.getTime() / 1000)}:R>`;
@@ -58,7 +59,7 @@ function buildStatusBody() {
                     },
                     {
                         type: 10,
-                        content: `> [Volt](https://voltbz.net): ${yellow}\n> [Potassium](https://potassium.pro): ${green}\n> [Cosmic](https://cosmic.best/): ${yellow}\n> [Synapse Z](https://z.synapse.do/): ${yellow}\n> [Seliware](https://seliware.com): ${yellow}`
+                        content: `> [Volt](https://voltbz.net): ${yellow}\n> [Potassium](https://potassium.pro): ${purple}\n> [Cosmic](https://cosmic.best/): ${yellow}\n> [Synapse Z](https://z.synapse.do/): ${yellow}\n> [Seliware](https://seliware.com): ${yellow}`
                     },
                     {
                         type: 14,
@@ -106,11 +107,20 @@ function buildStatusBody() {
                     },
                     {
                         type: 10,
-                        content: `-# ${green} Working · ${yellow} Untested · ${red} Not available for this script`
+                        content: `-# ${green} Working · ${yellow} Untested · ${red} Not available for this script · ${purple} Detected by Anti-Cheat in some games`
                     },
                     {
                         type: 10,
                         content: `-# Last updated: ${timestamp}`
+                    },
+                    {
+                        type: 14,
+                        divider: true,
+                        spacing: 1
+                    },
+                    {
+                        type: 10,
+                        content: `[# Support Executor](https://discord.gg/syshub)`
                     }
                 ]
             }
