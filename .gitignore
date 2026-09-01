@@ -3,3 +3,4 @@ node_modules/
 .env.local
 package-lock.json
 executor_status_msg_id.txt
+game_status_msg_id.txt

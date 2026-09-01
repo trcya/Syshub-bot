@@ -2,6 +2,7 @@ const { Events, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = r
 const { WebcastPushConnection } = require('tiktok-live-connector/legacy');
 const { updateStats } = require('../utils/statsManager');
 const { sendOrUpdateStatus } = require('../utils/statusBuilder');
+const { sendOrUpdateGameStatus } = require('../utils/gameStatusBuilder');
 const fs = require('fs');
 const path = require('path');
 
@@ -158,6 +159,7 @@ module.exports = {
         console.log(`Siap! Login sebagai ${client.user.tag}`);
 
         await sendOrUpdateStatus(client);
+        await sendOrUpdateGameStatus(client);
         await updateStats(client, true);
         setInterval(() => { updateStats(client); }, 10 * 60 * 1000);
 
