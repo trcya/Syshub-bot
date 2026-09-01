@@ -120,7 +120,7 @@ function buildStatusBody() {
                     },
                     {
                         type: 10,
-                        content: `[# Support Executor](https://discord.gg/syshub)`
+                        content: `[Support Executor](https://realvelocity.xyz/)`
                     }
                 ]
             }
