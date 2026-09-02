@@ -194,36 +194,56 @@ async function checkTiktokContent(username) {
 
 async function checkTiktokLive(username) {
     try {
-        const connection = new WebcastPushConnection(username, { processInitialData: false });
-        const state = await connection.connect();
-        const roomId = state.roomId;
-        await connection.disconnect();
+        const url = `https://www.tiktok.com/@${username}/live`;
+        const res = await fetch(url, {
+            headers: { 
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Accept-Language': 'en-US,en;q=0.9'
+            }
+        });
+        if (!res.ok) return { isLive: false };
+
+        const html = await res.text();
+        const isOffline = html.includes('"roomStatus":4') || html.includes('LIVE_STUDIO_OFFLINE') || html.includes('is_offline":true') || (!html.includes('"roomStatus":2') && !html.includes('"roomTitle"'));
+        if (isOffline) {
+            return { isLive: false };
+        }
 
         let avatarUrl = null;
+        const avatarMatch = html.match(/"avatarLarger":"([^"]+)"/) || html.match(/"avatarThumb":"([^"]+)"/);
+        if (avatarMatch) avatarUrl = avatarMatch[1].replace(/\\u002F/g, '/').replace(/\\u0026/g, '&');
+
         let channelName = username;
-        try {
-            const res = await fetch(`https://www.tiktok.com/@${username}`, {
-                headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36' }
-            });
-            if (res.ok) {
-                const html = await res.text();
-                const avatarMatch = html.match(/"avatarLarger":"([^"]+)"/) || html.match(/"avatarThumb":"([^"]+)"/);
-                if (avatarMatch) avatarUrl = avatarMatch[1].replace(/\\u002F/g, '/').replace(/\\u0026/g, '&');
-                const nicknameMatch = html.match(/"nickname":"([^"]+)"/);
-                if (nicknameMatch) channelName = nicknameMatch[1];
-            }
-        } catch (_) {}
+        const nicknameMatch = html.match(/"nickname":"([^"]+)"/);
+        if (nicknameMatch) channelName = nicknameMatch[1];
+
+        let title = `Siaran langsung @${username} sedang berjalan di TikTok!`;
+        const roomTitleMatch = html.match(/"roomTitle":"([^"]+)"/) || html.match(/"title":"([^"]+)"/);
+        if (roomTitleMatch && roomTitleMatch[1]) {
+            title = roomTitleMatch[1];
+        }
+
+        let thumbnailUrl = null;
+        const coverMatch = html.match(/"coverUrl":\["([^"]+)"/) || html.match(/"cover":"([^"]+)"/);
+        if (coverMatch) {
+            thumbnailUrl = coverMatch[1].replace(/\\u002F/g, '/').replace(/\\u0026/g, '&');
+        } else if (avatarUrl) {
+            thumbnailUrl = avatarUrl;
+        }
+
+        const roomIdMatch = html.match(/"roomId":"(\d+)"/) || html.match(/"room_id":"(\d+)"/);
+        const roomId = roomIdMatch ? roomIdMatch[1] : 'live_' + username;
 
         return {
             isLive: true,
             videoId: roomId,
-            title: `Siaran langsung @${username} sedang berjalan di TikTok!`,
+            title,
             channelName,
             avatarUrl,
+            thumbnailUrl,
             streamUrl: `https://www.tiktok.com/@${username}/live`
         };
     } catch (e) {
-        if (e.message.includes("isn't online")) return { isLive: false };
         console.error(`[TIKTOK ERROR] ${username}:`, e.message);
         return { isLive: false, error: true };
     }
