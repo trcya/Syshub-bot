@@ -37,11 +37,11 @@ module.exports = {
                     { name: 'YouTube', value: 'youtube' },
                     { name: 'TikTok', value: 'tiktok' }
                 ))
-                .addStringOption(opt => opt.setName('handle').setDescription('Username TikTok atau handle YouTube').setRequired(true))
+                .addStringOption(opt => opt.setName('handle').setDescription('Username TikTok (tanpa @) atau handle YouTube (dengan @)').setRequired(true))
                 .addStringOption(opt => opt.setName('content_type').setDescription('Tipe konten yang dipantau').setRequired(true).addChoices(
                     { name: '🔴 Live Stream', value: 'live' },
                     { name: '🎬 Video Upload', value: 'videos' },
-                    { name: '⚡ Shorts', value: 'shorts' }
+                    { name: '⚡ Shorts (YouTube only)', value: 'shorts' }
                 ))
                 .addChannelOption(opt => opt.setName('channel').setDescription('Channel Discord untuk notifikasi').setRequired(true).addChannelTypes(ChannelType.GuildText))
         )
@@ -55,7 +55,7 @@ module.exports = {
                 .addStringOption(opt => opt.setName('content_type').setDescription('Tipe konten').setRequired(true).addChoices(
                     { name: '🔴 Live Stream', value: 'live' },
                     { name: '🎬 Video Upload', value: 'videos' },
-                    { name: '⚡ Shorts', value: 'shorts' }
+                    { name: '⚡ Shorts (YouTube only)', value: 'shorts' }
                 ))
         )
         .addSubcommand(sub =>

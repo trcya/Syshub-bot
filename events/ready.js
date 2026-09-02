@@ -1,5 +1,4 @@
 const { Events, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-const { WebcastPushConnection } = require('tiktok-live-connector/legacy');
 const { updateStats } = require('../utils/statsManager');
 const { sendOrUpdateStatus } = require('../utils/statusBuilder');
 const { sendOrUpdateGameStatus } = require('../utils/gameStatusBuilder');
@@ -144,12 +143,16 @@ async function checkTiktokContent(username) {
     try {
         const url = `https://www.tiktok.com/@${username}`;
         const res = await fetch(url, {
-            headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36' }
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+                'Accept-Language': 'en-US,en;q=0.9',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
+            }
         });
         if (!res.ok) return { isLive: false, error: true };
 
         const html = await res.text();
-        
+
         let avatarUrl = null;
         const avatarMatch = html.match(/"avatarLarger":"([^"]+)"/) || html.match(/"avatarThumb":"([^"]+)"/);
         if (avatarMatch) {
@@ -162,18 +165,97 @@ async function checkTiktokContent(username) {
             channelName = nicknameMatch[1];
         }
 
-        const videoIdMatches = [...html.matchAll(/"id"\s*:\s*"(\d+)"/g)];
-        const videoIds = [...new Set(videoIdMatches.map(m => m[1]))].slice(0, 5);
+        // Method 1: Try UNIVERSAL_DATA_FOR_REHYDRATION (newer TikTok format)
+        const universalDataMatch = html.match(/<script id="__UNIVERSAL_DATA_FOR_REHYDRATION__"[^>]*>([\s\S]*?)<\/script>/);
+        if (universalDataMatch) {
+            try {
+                const universalData = JSON.parse(universalDataMatch[1]);
+                const defaultScope = universalData?.__DEFAULT_SCOPE__;
+                const userDetail = defaultScope?.['webapp.user-detail'];
+                const userInfo = userDetail?.userInfo;
+                const user = userInfo?.user;
+
+                if (user) {
+                    channelName = user.nickname || username;
+                    avatarUrl = user.avatarLarger || user.avatarThumb || avatarUrl;
+                }
+
+                const itemModule = defaultScope?.['webapp.video-detail']?.itemInfo?.itemStruct;
+                if (itemModule?.id) {
+                    return {
+                        isLive: true,
+                        videoId: itemModule.id,
+                        title: itemModule.desc || 'New TikTok Video',
+                        channelName,
+                        avatarUrl,
+                        thumbnailUrl: (itemModule.video?.cover || itemModule.video?.dynamicCover || null)?.replace(/\\u002F/g, '/'),
+                        streamUrl: `https://www.tiktok.com/@${username}/video/${itemModule.id}`
+                    };
+                }
+
+                // Try user post items
+                const userPost = defaultScope?.['webapp.user-post']?.itemList;
+                if (Array.isArray(userPost) && userPost.length > 0) {
+                    const latest = userPost[0];
+                    if (latest.id) {
+                        return {
+                            isLive: true,
+                            videoId: latest.id,
+                            title: latest.desc || 'New TikTok Video',
+                            channelName,
+                            avatarUrl,
+                            thumbnailUrl: (latest.video?.cover || latest.video?.dynamicCover || null)?.replace(/\\u002F/g, '/'),
+                            streamUrl: `https://www.tiktok.com/@${username}/video/${latest.id}`
+                        };
+                    }
+                }
+            } catch (parseErr) {
+                // JSON parse failed, continue to other methods
+            }
+        }
+
+        // Method 2: Try SIGI_STATE
+        const sigiMatch = html.match(/<script id="SIGI_STATE"[^>]*>([\s\S]*?)<\/script>/);
+        if (sigiMatch) {
+            try {
+                const sigiData = JSON.parse(sigiMatch[1]);
+                const itemModule = sigiData?.ItemModule;
+                if (itemModule) {
+                    const items = Object.values(itemModule);
+                    if (items.length > 0) {
+                        const latest = items[0];
+                        return {
+                            isLive: true,
+                            videoId: latest.id,
+                            title: latest.desc || 'New TikTok Video',
+                            channelName: latest.author?.uniqueId ? `@${latest.author.uniqueId}` : channelName,
+                            avatarUrl: latest.author?.avatarThumb || avatarUrl,
+                            thumbnailUrl: (latest.video?.cover || latest.video?.dynamicCover || null),
+                            streamUrl: `https://www.tiktok.com/@${username}/video/${latest.id}`
+                        };
+                    }
+                }
+            } catch (parseErr) {
+                // JSON parse failed, continue to other methods
+            }
+        }
+
+        // Method 3: Fallback regex (original approach but improved)
+        const videoIdMatches = [...html.matchAll(/"id"\s*:\s*"(\d{15,})"/g)];
+        const videoIds = [...new Set(videoIdMatches.map(m => m[1]))].slice(0, 10);
 
         for (const videoId of videoIds) {
-            const idx = html.indexOf(`"id":"${videoId}"`);
+            const idx = html.indexOf(`"${videoId}"`);
             if (idx === -1) continue;
-            const sub = html.substring(idx - 500, idx + 2500);
-            const descMatch = sub.match(/"desc"\s*:\s*"([^"]+)"/);
-            const coverMatch = sub.match(/"cover"\s*:\s*"([^"]+)"/) || sub.match(/"dynamicCover"\s*:\s*"([^"]+)"/);
-            let thumbnailUrl = coverMatch ? coverMatch[1].replace(/\\u002F/g, '/').replace(/\\u0026/g, '&') : null;
+            const sub = html.substring(idx, idx + 3000);
 
+            const descMatch = sub.match(/"desc"\s*:\s*"([^"]*?)"/);
             if (descMatch) {
+                const coverMatch = sub.match(/"cover"\s*:\s*\{[^}]*"url"\s*:\s*"([^"]+)"/);
+                const dynamicCoverMatch = sub.match(/"dynamicCover"\s*:\s*\{[^}]*"url"\s*:\s*"([^"]+)"/);
+                const simpleCoverMatch = sub.match(/"cover"\s*:\s*"([^"]+)"/);
+                const thumbnailUrl = (coverMatch?.[1] || dynamicCoverMatch?.[1] || simpleCoverMatch?.[1] || null)?.replace(/\\u002F/g, '/').replace(/\\u0026/g, '&');
+
                 return {
                     isLive: true,
                     videoId,
@@ -185,6 +267,7 @@ async function checkTiktokContent(username) {
                 };
             }
         }
+
         return { isLive: false };
     } catch (e) {
         console.error(`[TIKTOK CONTENT ERROR] ${username}:`, e.message);
@@ -291,14 +374,52 @@ module.exports = {
                                 ? 'https://cdn-icons-png.flaticon.com/512/1384/1384060.png'
                                 : 'https://cdn-icons-png.flaticon.com/512/3046/3046124.png';
 
+                            const platformColor = item.platform === 'youtube' ? 0xFF0000 : 0xFE2C55;
+                            const platformIcon = item.platform === 'youtube'
+                                ? 'https://cdn-icons-png.flaticon.com/512/1384/1384060.png'
+                                : 'https://cdn-icons-png.flaticon.com/512/3046/3046124.png';
+
+                            let contentAlert = '';
+                            let buttonLabel = 'Watch Stream';
+                            let footerText = '';
+
+                            if (item.platform === 'youtube') {
+                                if (cType === 'live') {
+                                    contentAlert = `**${status.channelName}** is live!`;
+                                    buttonLabel = 'Watch Stream';
+                                    footerText = 'YouTube Live';
+                                } else if (cType === 'shorts') {
+                                    contentAlert = `**${status.channelName}** posted a new Short!`;
+                                    buttonLabel = 'Watch Shorts';
+                                    footerText = 'YouTube Shorts';
+                                } else {
+                                    contentAlert = `**${status.channelName}** uploaded a new video!`;
+                                    buttonLabel = 'Watch Video';
+                                    footerText = 'YouTube Video';
+                                }
+                            } else if (item.platform === 'tiktok') {
+                                if (cType === 'live') {
+                                    contentAlert = `**${status.channelName}** is live!`;
+                                    buttonLabel = 'Watch Stream';
+                                    footerText = 'TikTok Live';
+                                } else {
+                                    contentAlert = `**${status.channelName}** posted a new video!`;
+                                    buttonLabel = 'Watch Video';
+                                    footerText = 'TikTok Video';
+                                }
+                            }
+
                             const embed = new EmbedBuilder()
-                                .setColor(item.platform === 'youtube' ? 0xFF0000 : 0xFE2C55)
+                                .setColor(platformColor)
                                 .setAuthor({
                                     name: status.channelName,
-                                    iconURL: status.avatarUrl || defaultIcon
+                                    iconURL: status.avatarUrl || defaultIcon,
+                                    url: status.streamUrl
                                 })
                                 .setTitle(status.title)
-                                .setURL(status.streamUrl);
+                                .setURL(status.streamUrl)
+                                .setFooter({ text: footerText, iconURL: platformIcon })
+                                .setTimestamp();
 
                             if (status.thumbnailUrl) {
                                 embed.setImage(status.thumbnailUrl);
@@ -306,32 +427,12 @@ module.exports = {
                                 embed.setImage(`https://i.ytimg.com/vi/${status.videoId}/hqdefault.jpg`);
                             }
 
-                            let buttonLabel = 'Watch Stream';
-                            let contentAlert = `@everyone\n${status.channelName} is live!`;
-
-                            if (item.platform === 'youtube') {
-                                if (cType === 'live') { 
-                                    contentAlert = `@everyone\n${status.channelName} is live!`; 
-                                    buttonLabel = 'Watch Stream'; 
-                                } else if (cType === 'shorts') { 
-                                    contentAlert = `@everyone\n${status.channelName} posted a new Short!`; 
-                                    buttonLabel = 'Watch Shorts'; 
-                                } else { 
-                                    contentAlert = `@everyone\n${status.channelName} uploaded a new video!`; 
-                                    buttonLabel = 'Watch Video'; 
-                                }
-                            } else if (item.platform === 'tiktok') {
-                                if (cType === 'live') { 
-                                    contentAlert = `@everyone\n${status.channelName} is live!`; 
-                                    buttonLabel = 'Watch Stream'; 
-                                } else { 
-                                    contentAlert = `@everyone\n${status.channelName} posted a new video!`; 
-                                    buttonLabel = 'Watch Video'; 
-                                }
-                            }
-
                             const row = new ActionRowBuilder().addComponents(
-                                new ButtonBuilder().setLabel(buttonLabel).setStyle(ButtonStyle.Link).setURL(status.streamUrl)
+                                new ButtonBuilder()
+                                    .setLabel(buttonLabel)
+                                    .setStyle(ButtonStyle.Link)
+                                    .setURL(status.streamUrl)
+                                    .setEmoji(item.platform === 'youtube' ? '🎬' : '🎵')
                             );
 
                             await targetChannel.send({ content: contentAlert, embeds: [embed], components: [row] });

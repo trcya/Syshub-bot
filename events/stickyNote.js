@@ -34,6 +34,7 @@ const STICKY_CHANNELS = {
 };
 
 const lastStickyMessage = new Map();
+const processing = new Set();
 
 module.exports = {
     name: Events.MessageCreate,
@@ -43,15 +44,25 @@ module.exports = {
         const sticky = STICKY_CHANNELS[message.channel.id];
         if (!sticky) return;
 
+        if (processing.has(message.channel.id)) return;
+        processing.add(message.channel.id);
+
         try {
             const oldMsgId = lastStickyMessage.get(message.channel.id);
             if (oldMsgId) {
                 const oldMsg = await message.channel.messages.fetch(oldMsgId).catch(() => null);
-                if (oldMsg) await oldMsg.delete().catch(() => {});
+                if (oldMsg && oldMsg.author.id === message.client.user.id) {
+                    await oldMsg.delete().catch(() => {});
+                }
             }
 
-            const newMsg = await message.channel.send({ content: sticky.lang === 'en' ? getStickyTextEn() : getStickyTextId() });
+            const content = sticky.lang === 'en' ? getStickyTextEn() : getStickyTextId();
+            const newMsg = await message.channel.send({ content });
             lastStickyMessage.set(message.channel.id, newMsg.id);
-        } catch {}
+        } catch (error) {
+            console.error(`[StickyNote] Error in channel ${message.channel.id}:`, error.message);
+        } finally {
+            processing.delete(message.channel.id);
+        }
     },
 };
