@@ -287,35 +287,92 @@ async function checkTiktokLive(username) {
         if (!res.ok) return { isLive: false };
 
         const html = await res.text();
-        const isOffline = html.includes('"roomStatus":4') || html.includes('LIVE_STUDIO_OFFLINE') || html.includes('is_offline":true') || (!html.includes('"roomStatus":2') && !html.includes('"roomTitle"'));
-        if (isOffline) {
+
+        let isLive = false;
+        let roomId = null;
+        let title = null;
+        let avatarUrl = null;
+        let channelName = username;
+        let thumbnailUrl = null;
+
+        const sigiMatch = html.match(/<script id="SIGI_STATE"[^>]*>([\s\S]*?)<\/script>/);
+        if (sigiMatch) {
+            try {
+                const sigiData = JSON.parse(sigiMatch[1]);
+                const liveRoom = sigiData?.LiveRoom;
+                const currentRoom = sigiData?.CurrentRoom;
+
+                if (liveRoom) {
+                    const liveStatus = liveRoom.liveRoomStatus;
+                    if (liveStatus === 2) {
+                        isLive = true;
+                    }
+                    const userInfo = liveRoom?.liveRoomUserInfo?.user;
+                    if (userInfo) {
+                        channelName = userInfo.nickname || username;
+                        avatarUrl = (userInfo.avatarLarger || userInfo.avatarThumb || '').replace(/\\u002F/g, '/').replace(/\\u0026/g, '&');
+                    }
+                }
+
+                if (currentRoom?.roomInfo) {
+                    const roomInfo = currentRoom.roomInfo;
+                    roomId = roomInfo.id || roomInfo.roomId || null;
+                    title = roomInfo.title || roomInfo.roomTitle || null;
+                    thumbnailUrl = (roomInfo.coverUrl || roomInfo.cover || '').replace(/\\u002F/g, '/').replace(/\\u0026/g, '&');
+                    if (!isLive) isLive = true;
+                    if (roomInfo.anchor) {
+                        channelName = roomInfo.anchor.nickname || channelName;
+                        avatarUrl = (roomInfo.anchor.avatarUrl || roomInfo.anchor.avatarLarger || '').replace(/\\u002F/g, '/').replace(/\\u0026/g, '&') || avatarUrl;
+                    }
+                }
+            } catch (e) {
+                // SIGI_STATE parse failed, fallback to regex
+            }
+        }
+
+        if (!isLive) {
+            const roomStatusMatch = html.match(/"roomStatus"\s*:\s*2/);
+            if (roomStatusMatch) {
+                isLive = true;
+            }
+        }
+
+        if (!isLive) {
             return { isLive: false };
         }
 
-        let avatarUrl = null;
-        const avatarMatch = html.match(/"avatarLarger":"([^"]+)"/) || html.match(/"avatarThumb":"([^"]+)"/);
-        if (avatarMatch) avatarUrl = avatarMatch[1].replace(/\\u002F/g, '/').replace(/\\u0026/g, '&');
-
-        let channelName = username;
-        const nicknameMatch = html.match(/"nickname":"([^"]+)"/);
-        if (nicknameMatch) channelName = nicknameMatch[1];
-
-        let title = `Siaran langsung @${username} sedang berjalan di TikTok!`;
-        const roomTitleMatch = html.match(/"roomTitle":"([^"]+)"/) || html.match(/"title":"([^"]+)"/);
-        if (roomTitleMatch && roomTitleMatch[1]) {
-            title = roomTitleMatch[1];
+        if (!channelName || channelName === username) {
+            const nicknameMatch = html.match(/"nickname":"([^"]+)"/);
+            if (nicknameMatch) channelName = nicknameMatch[1];
         }
 
-        let thumbnailUrl = null;
-        const coverMatch = html.match(/"coverUrl":\["([^"]+)"/) || html.match(/"cover":"([^"]+)"/);
-        if (coverMatch) {
-            thumbnailUrl = coverMatch[1].replace(/\\u002F/g, '/').replace(/\\u0026/g, '&');
-        } else if (avatarUrl) {
-            thumbnailUrl = avatarUrl;
+        if (!title) {
+            const roomTitleMatch = html.match(/"roomTitle":"([^"]+)"/) || html.match(/"title":"([^"]+)"/);
+            if (roomTitleMatch && roomTitleMatch[1]) {
+                title = roomTitleMatch[1];
+            } else {
+                title = `Siaran langsung @${username} sedang berjalan di TikTok!`;
+            }
         }
 
-        const roomIdMatch = html.match(/"roomId":"(\d+)"/) || html.match(/"room_id":"(\d+)"/);
-        const roomId = roomIdMatch ? roomIdMatch[1] : 'live_' + username;
+        if (!avatarUrl) {
+            const avatarMatch = html.match(/"avatarLarger":"([^"]+)"/) || html.match(/"avatarThumb":"([^"]+)"/);
+            if (avatarMatch) avatarUrl = avatarMatch[1].replace(/\\u002F/g, '/').replace(/\\u0026/g, '&');
+        }
+
+        if (!thumbnailUrl) {
+            const coverMatch = html.match(/"coverUrl":\["([^"]+)"/) || html.match(/"cover":"([^"]+)"/);
+            if (coverMatch) {
+                thumbnailUrl = coverMatch[1].replace(/\\u002F/g, '/').replace(/\\u0026/g, '&');
+            } else if (avatarUrl) {
+                thumbnailUrl = avatarUrl;
+            }
+        }
+
+        if (!roomId) {
+            const roomIdMatch = html.match(/"roomId":"(\d+)"/) || html.match(/"room_id":"(\d+)"/);
+            roomId = roomIdMatch ? roomIdMatch[1] : 'live_' + username;
+        }
 
         return {
             isLive: true,
