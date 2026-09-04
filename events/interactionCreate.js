@@ -504,6 +504,7 @@ module.exports = {
                     const ticketChannel = await guild.channels.create({
                         name: ticketName,
                         type: ChannelType.GuildText,
+                        parent: JOKI_CATEGORY_ID,
                         permissionOverwrites,
                     });
 
