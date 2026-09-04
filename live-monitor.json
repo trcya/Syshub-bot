@@ -34,5 +34,23 @@
     "guildId": "",
     "lastStreamId": null,
     "offlineCount": 0
+  },
+  {
+    "platform": "youtube",
+    "handle": "@syshub.official",
+    "contentType": "live",
+    "discordChannelId": "1494148813441732750",
+    "guildId": "",
+    "lastStreamId": null,
+    "offlineCount": 0
+  },
+  {
+    "platform": "youtube",
+    "handle": "@syshub.official",
+    "contentType": "videos",
+    "discordChannelId": "1494148923013595156",
+    "guildId": "",
+    "lastStreamId": null,
+    "offlineCount": 0
   }
 ]

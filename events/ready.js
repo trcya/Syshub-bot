@@ -115,7 +115,7 @@ async function checkYoutubeContent(handle, contentType) {
                     };
                 }
             } else {
-                const titleMatch = sub.match(/"title"\s*:\s*\{"content"\s*:\s*"([^"]+)"/);
+                const titleMatch = sub.match(/"title"\s*:\s*\{"content"\s*:\s*"([^"]+)"/) || sub.match(/"title"\s*:\s*\{\s*"runs"\s*:\s*\[\s*\{\s*"text"\s*:\s*"([^"]+)"/);
                 if (titleMatch) {
                     let channelName = handle;
                     const channelNameMatch = html.match(/<link itemprop="name" content="([^"]+)"/) || html.match(/"ownerChannelName":"([^"]+)"/);
