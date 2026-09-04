@@ -199,39 +199,11 @@ module.exports = {
 
             // === JOKI TICKET HANDLERS ===
 
-            // 5. JOKI BUTTON - Create ticket directly
-            if (customId.startsWith('joki_btn_')) {
-                const jokiMap = {
-                    'joki_btn_t1j':  { category: '🏃 Treadmill Only', label: '1 Jam', price: 2000 },
-                    'joki_btn_t3j':  { category: '🏃 Treadmill Only', label: '3 Jam', price: 5000 },
-                    'joki_btn_t6j':  { category: '🏃 Treadmill Only', label: '6 Jam', price: 10000 },
-                    'joki_btn_t12j': { category: '🏃 Treadmill Only', label: '12 Jam', price: 18000 },
-                    'joki_btn_t1h':  { category: '🏃 Treadmill Only', label: '1 Hari', price: 30000 },
-                    'joki_btn_t2h':  { category: '🏃 Treadmill Only', label: '2 Hari', price: 55000 },
-                    'joki_btn_t3h':  { category: '🏃 Treadmill Only', label: '3 Hari', price: 75000 },
-                    'joki_btn_t5h':  { category: '🏃 Treadmill Only', label: '5 Hari', price: 115000 },
-                    'joki_btn_t7h':  { category: '🏃 Treadmill Only', label: '7 Hari', price: 150000 },
-                    'joki_btn_t14h': { category: '🏃 Treadmill Only', label: '14 Hari', price: 280000 },
-                    'joki_btn_t21h': { category: '🏃 Treadmill Only', label: '21 Hari', price: 390000 },
-                    'joki_btn_t30h': { category: '🏃 Treadmill Only', label: '30 Hari', price: 500000 },
-                    'joki_btn_e1j':  { category: '🥚 Treadmill + Steal Egg', label: '1 Jam', price: 5000 },
-                    'joki_btn_e3j':  { category: '🥚 Treadmill + Steal Egg', label: '3 Jam', price: 14000 },
-                    'joki_btn_e6j':  { category: '🥚 Treadmill + Steal Egg', label: '6 Jam', price: 25000 },
-                    'joki_btn_e12j': { category: '🥚 Treadmill + Steal Egg', label: '12 Jam', price: 45000 },
-                    'joki_btn_e1h':  { category: '🥚 Treadmill + Steal Egg', label: '1 Hari', price: 80000 },
-                    'joki_btn_e2h':  { category: '🥚 Treadmill + Steal Egg', label: '2 Hari', price: 150000 },
-                    'joki_btn_e3h':  { category: '🥚 Treadmill + Steal Egg', label: '3 Hari', price: 220000 },
-                    'joki_btn_e5h':  { category: '🥚 Treadmill + Steal Egg', label: '5 Hari', price: 330000 },
-                    'joki_btn_e7h':  { category: '🥚 Treadmill + Steal Egg', label: '7 Hari', price: 450000 },
-                    'joki_btn_e14h': { category: '🥚 Treadmill + Steal Egg', label: '14 Hari', price: 850000 },
-                    'joki_btn_e21h': { category: '🥚 Treadmill + Steal Egg', label: '21 Hari', price: 1150000 },
-                    'joki_btn_e30h': { category: '🥚 Treadmill + Steal Egg', label: '30 Hari', price: 1500000 },
-                };
-
-                const option = jokiMap[customId];
-                if (!option) return;
-
-                const formatPrice = (val) => 'Rp ' + val.toLocaleString('id-ID');
+            // 5. JOKI TREADMILL / TREADMILL+EGG BUTTON - Create ticket
+            if (customId === 'joki_treadmill' || customId === 'joki_treadmill_egg') {
+                const isEgg = customId === 'joki_treadmill_egg';
+                const serviceType = isEgg ? 'Treadmill + Steal Egg' : 'Treadmill Only';
+                const serviceEmoji = isEgg ? '🥚' : '🏃';
 
                 const ticketName = `joki-${user.username}`;
                 const existingTicket = guild.channels.cache.find(c => c.name === ticketName.toLowerCase());
@@ -255,24 +227,50 @@ module.exports = {
                         permissionOverwrites,
                     });
 
-                    const embed = new EmbedBuilder()
-                        .setTitle('🤖 New Joki Ticket')
+                    const preEmbed = new EmbedBuilder()
+                        .setTitle(`${serviceEmoji} Joki ${serviceType}`)
                         .setColor('#5865F2')
-                        .setDescription(`Welcome ${user}!\nStaff akan segera membantu kamu.`)
-                        .addFields(
-                            { name: '📋 Layanan', value: option.category, inline: true },
-                            { name: '⏱️ Durasi', value: option.label, inline: true },
-                            { name: '💰 Total Harga', value: `**${formatPrice(option.price)}**`, inline: true },
-                        )
+                        .setDescription(`Welcome ${user}!\nStaff akan segera membantu kamu.\n\nPilih durasi yang kamu inginkan:`)
                         .setFooter({ text: 'SysHub Joki Service' })
                         .setTimestamp();
 
-                    const row = new ActionRowBuilder()
-                        .addComponents(
-                            new ButtonBuilder().setCustomId('close_joki_ticket').setLabel('Close Ticket').setStyle(ButtonStyle.Danger).setEmoji('🔒'),
-                        );
+                    const tBtns1 = [
+                        { id: 'joki_dur_6j',  label: '6 Jam — 7K' },
+                        { id: 'joki_dur_12j', label: '12 Jam — 10K' },
+                        { id: 'joki_dur_1h',  label: '1 Hari — 15K' },
+                        { id: 'joki_dur_2h',  label: '2 Hari — 25K' },
+                        { id: 'joki_dur_3h',  label: '3 Hari — 35K' },
+                    ];
+                    const tBtns2 = [
+                        { id: 'joki_dur_5h',  label: '5 Hari — 50K' },
+                        { id: 'joki_dur_7h',  label: '7 Hari — 65K' },
+                        { id: 'joki_dur_14h', label: '14 Hari — 120K' },
+                        { id: 'joki_dur_21h', label: '21 Hari — 170K' },
+                        { id: 'joki_dur_30h', label: '30 Hari — 220K' },
+                    ];
+                    const eBtns1 = [
+                        { id: 'joki_dur_egg_6j',  label: '6 Jam — 14K' },
+                        { id: 'joki_dur_egg_12j', label: '12 Jam — 22K' },
+                        { id: 'joki_dur_egg_1h',  label: '1 Hari — 35K' },
+                        { id: 'joki_dur_egg_2h',  label: '2 Hari — 60K' },
+                        { id: 'joki_dur_egg_3h',  label: '3 Hari — 85K' },
+                    ];
+                    const eBtns2 = [
+                        { id: 'joki_dur_egg_5h',  label: '5 Hari — 130K' },
+                        { id: 'joki_dur_egg_7h',  label: '7 Hari — 170K' },
+                        { id: 'joki_dur_egg_14h', label: '14 Hari — 300K' },
+                        { id: 'joki_dur_egg_21h', label: '21 Hari — 400K' },
+                        { id: 'joki_dur_egg_30h', label: '30 Hari — 500K' },
+                    ];
 
-                    await ticketChannel.send({ content: `${user} | <@&${staffId}>`, embeds: [embed], components: [row] });
+                    const btns = isEgg ? [eBtns1, eBtns2] : [tBtns1, tBtns2];
+                    const rows = btns.map(pair => {
+                        return new ActionRowBuilder().addComponents(
+                            pair.map(b => new ButtonBuilder().setCustomId(b.id).setLabel(b.label).setStyle(isEgg ? ButtonStyle.Success : ButtonStyle.Primary))
+                        );
+                    });
+
+                    await ticketChannel.send({ content: `${user} | <@&${staffId}>`, embeds: [preEmbed], components: rows });
                     await interaction.editReply({ content: `Ticket created: ${ticketChannel}` });
 
                     const jokiLogChannel = guild.channels.cache.get(JOKI_TICKET_LOG_CHANNEL);
@@ -283,9 +281,7 @@ module.exports = {
                             .addFields(
                                 { name: 'User', value: `${user} (${user.id})`, inline: true },
                                 { name: 'Channel', value: ticketChannel.name, inline: true },
-                                { name: 'Layanan', value: option.category, inline: true },
-                                { name: 'Durasi', value: option.label, inline: true },
-                                { name: 'Total', value: formatPrice(option.price), inline: true },
+                                { name: 'Layanan', value: serviceType, inline: true },
                             )
                             .setTimestamp();
                         jokiLogChannel.send({ embeds: [logEmbed] });
@@ -294,6 +290,62 @@ module.exports = {
                     console.error('Failed to create joki ticket:', error);
                     await interaction.editReply({ content: 'Failed to create ticket channel. Please contact an administrator.' });
                 }
+            }
+
+            // 6. JOKI DURATION BUTTON - Update ticket with selected duration
+            if (customId.startsWith('joki_dur_')) {
+                const jokiDurMap = {
+                    'joki_dur_6j':       { label: '6 Jam', price: 7000 },
+                    'joki_dur_12j':      { label: '12 Jam', price: 10000 },
+                    'joki_dur_1h':       { label: '1 Hari', price: 15000 },
+                    'joki_dur_2h':       { label: '2 Hari', price: 25000 },
+                    'joki_dur_3h':       { label: '3 Hari', price: 35000 },
+                    'joki_dur_5h':       { label: '5 Hari', price: 50000 },
+                    'joki_dur_7h':       { label: '7 Hari', price: 65000 },
+                    'joki_dur_14h':      { label: '14 Hari', price: 120000 },
+                    'joki_dur_21h':      { label: '21 Hari', price: 170000 },
+                    'joki_dur_30h':      { label: '30 Hari', price: 220000 },
+                    'joki_dur_egg_6j':   { label: '6 Jam', price: 14000 },
+                    'joki_dur_egg_12j':  { label: '12 Jam', price: 22000 },
+                    'joki_dur_egg_1h':   { label: '1 Hari', price: 35000 },
+                    'joki_dur_egg_2h':   { label: '2 Hari', price: 60000 },
+                    'joki_dur_egg_3h':   { label: '3 Hari', price: 85000 },
+                    'joki_dur_egg_5h':   { label: '5 Hari', price: 130000 },
+                    'joki_dur_egg_7h':   { label: '7 Hari', price: 170000 },
+                    'joki_dur_egg_14h':  { label: '14 Hari', price: 300000 },
+                    'joki_dur_egg_21h':  { label: '21 Hari', price: 400000 },
+                    'joki_dur_egg_30h':  { label: '30 Hari', price: 500000 },
+                };
+
+                const opt = jokiDurMap[customId];
+                if (!opt) return;
+
+                const formatPrice = (v) => 'Rp ' + v.toLocaleString('id-ID');
+                const isEgg = customId.includes('egg');
+                const serviceType = isEgg ? '🥚 Treadmill + Steal Egg' : '🏃 Treadmill Only';
+                const color = isEgg ? '#57F287' : '#5865F2';
+
+                const oldEmbed = interaction.message.embeds[0];
+                const embed = new EmbedBuilder()
+                    .setTitle(oldEmbed?.title || '🤖 Joki Ticket')
+                    .setColor(color)
+                    .setDescription(`Welcome ${user}!\nStaff akan segera membantu kamu.`)
+                    .addFields(
+                        { name: '📋 Layanan', value: serviceType, inline: true },
+                        { name: '⏱️ Durasi', value: `**${opt.label}**`, inline: true },
+                        { name: '💰 Total Harga', value: `**${formatPrice(opt.price)}**`, inline: true },
+                    )
+                    .setFooter({ text: 'SysHub Joki Service' })
+                    .setTimestamp();
+
+                const row = new ActionRowBuilder()
+                    .addComponents(
+                        new ButtonBuilder().setCustomId('close_joki_ticket').setLabel('Close Ticket').setStyle(ButtonStyle.Danger).setEmoji('🔒'),
+                    );
+
+                await interaction.update({ embeds: [embed], components: [row] });
+
+                await channel.send(`${user} memilih **${serviceType}** durasi **${opt.label}** — **${formatPrice(opt.price)}**`);
             }
 
             // 7. CLOSE JOKI TICKET - Transcript + Delete
