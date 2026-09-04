@@ -1,57 +1,8 @@
-const { Events, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, PermissionFlagsBits, ChannelType, ModalBuilder, TextInputBuilder, TextInputStyle, StringSelectMenuBuilder } = require('discord.js');
+const { Events, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, PermissionFlagsBits, ChannelType, ModalBuilder, TextInputBuilder, TextInputStyle } = require('discord.js');
 const { getEmbed, getButtons } = require('../utils/welcomeEmbed');
 
 const JOKI_TICKET_LOG_CHANNEL = '1545265772731957388';
 const JOKI_CATEGORY_ID = '1545263915158478898';
-
-const JOKI_PRICING = {
-    treadmill: {
-        label: '🏃 Treadmill Only',
-        options: [
-            { label: '1 Jam', value: 'treadmill_1j', price: 2000 },
-            { label: '3 Jam', value: 'treadmill_3j', price: 5000 },
-            { label: '6 Jam', value: 'treadmill_6j', price: 10000 },
-            { label: '12 Jam', value: 'treadmill_12j', price: 18000 },
-            { label: '1 Hari', value: 'treadmill_1h', price: 30000 },
-            { label: '2 Hari', value: 'treadmill_2h', price: 55000 },
-            { label: '3 Hari', value: 'treadmill_3h', price: 75000 },
-            { label: '5 Hari', value: 'treadmill_5h', price: 115000 },
-            { label: '7 Hari', value: 'treadmill_7h', price: 150000 },
-            { label: '14 Hari', value: 'treadmill_14h', price: 280000 },
-            { label: '21 Hari', value: 'treadmill_21h', price: 390000 },
-            { label: '30 Hari', value: 'treadmill_30h', price: 500000 },
-        ]
-    },
-    treadmill_egg: {
-        label: '🥚 Treadmill + Steal Egg',
-        options: [
-            { label: '1 Jam', value: 'egg_1j', price: 5000 },
-            { label: '3 Jam', value: 'egg_3j', price: 14000 },
-            { label: '6 Jam', value: 'egg_6j', price: 25000 },
-            { label: '12 Jam', value: 'egg_12j', price: 45000 },
-            { label: '1 Hari', value: 'egg_1h', price: 80000 },
-            { label: '2 Hari', value: 'egg_2h', price: 150000 },
-            { label: '3 Hari', value: 'egg_3h', price: 220000 },
-            { label: '5 Hari', value: 'egg_5h', price: 330000 },
-            { label: '7 Hari', value: 'egg_7h', price: 450000 },
-            { label: '14 Hari', value: 'egg_14h', price: 850000 },
-            { label: '21 Hari', value: 'egg_21h', price: 1150000 },
-            { label: '30 Hari', value: 'egg_30h', price: 1500000 },
-        ]
-    }
-};
-
-function findJokiOption(value) {
-    for (const key of Object.keys(JOKI_PRICING)) {
-        const found = JOKI_PRICING[key].options.find(o => o.value === value);
-        if (found) return { ...found, category: JOKI_PRICING[key].label };
-    }
-    return null;
-}
-
-function formatPrice(val) {
-    return 'Rp ' + val.toLocaleString('id-ID');
-}
 
 async function generateTranscript(channel) {
     let messages = [];
@@ -154,15 +105,31 @@ module.exports = {
                 if (!member.roles.cache.has(staffId) && user.id !== staffId) {
                     return interaction.reply({ content: 'Only staff can claim tickets!', ephemeral: true });
                 }
-                
+
+                const oldEmbed = interaction.message.embeds[0];
+                const oldDesc = oldEmbed?.description || '';
+                const oldFields = oldEmbed?.fields || [];
+
+                const claimDesc = oldDesc
+                    .replace(/\*\*Staff <@&\d+> must claim this ticket first\.\*\*/, '')
+                    .replace(/\n\n$/, '')
+                    .trim();
+
                 const claimEmbed = new EmbedBuilder()
-                    .setTitle('📌 Ticket Claimed')
+                    .setTitle(oldEmbed?.title || '🤝 Midman Ticket')
                     .setColor('#FEE75C')
-                    .setDescription(`This ticket has been claimed by ${user}.\nStaff will assist you now.`)
+                    .setDescription(`${claimDesc}\n\n✅ **Ticket claimed by** ${user}\nStaff akan membantu kamu sekarang.`)
                     .setTimestamp();
+
+                for (const field of oldFields) {
+                    claimEmbed.addFields({ name: field.name, value: field.value, inline: field.inline });
+                }
+
+                if (oldEmbed?.footer) claimEmbed.setFooter({ text: oldEmbed.footer.text });
 
                 const row = new ActionRowBuilder()
                     .addComponents(
+                        new ButtonBuilder().setCustomId('add_midman_user').setLabel('Add User').setStyle(ButtonStyle.Primary).setEmoji('👤'),
                         new ButtonBuilder().setCustomId('close_ticket').setLabel('Close').setStyle(ButtonStyle.Danger).setEmoji('🔒'),
                         new ButtonBuilder().setCustomId('cancel_ticket').setLabel('Cancel').setStyle(ButtonStyle.Secondary).setEmoji('✖️'),
                     );
@@ -173,6 +140,29 @@ module.exports = {
                     const logEmbed = new EmbedBuilder().setTitle('📌 Ticket Claimed').setColor('#FEE75C').addFields({ name: 'Staff', value: `${user} (${user.id})`, inline: true }, { name: 'Channel', value: `${channel.name}`, inline: true }).setTimestamp();
                     logChannel.send({ embeds: [logEmbed] });
                 }
+            }
+
+            // 2b. ADD MIDMAN USER - Show Modal
+            if (customId === 'add_midman_user') {
+                if (!member.roles.cache.has(staffId) && user.id !== staffId) {
+                    return interaction.reply({ content: 'Only staff can add users!', ephemeral: true });
+                }
+
+                const modal = new ModalBuilder()
+                    .setCustomId('add_user_modal')
+                    .setTitle('Tambah User ke Ticket');
+
+                const userIdInput = new TextInputBuilder()
+                    .setCustomId('user_id_input')
+                    .setLabel('User ID Discord')
+                    .setStyle(TextInputStyle.Short)
+                    .setPlaceholder('Contoh: 123456789012345678')
+                    .setRequired(true);
+
+                const firstRow = new ActionRowBuilder().addComponents(userIdInput);
+                modal.addComponents(firstRow);
+
+                await interaction.showModal(modal);
             }
 
             // 3. CLOSE TICKET
@@ -209,36 +199,39 @@ module.exports = {
 
             // === JOKI TICKET HANDLERS ===
 
-            // 5. JOKI TREADMILL BUTTON - Show dropdown
-            if (customId === 'joki_treadmill' || customId === 'joki_treadmill_egg') {
-                const type = customId === 'joki_treadmill' ? 'treadmill' : 'treadmill_egg';
-                const pricing = JOKI_PRICING[type];
+            // 5. JOKI BUTTON - Create ticket directly
+            if (customId.startsWith('joki_btn_')) {
+                const jokiMap = {
+                    'joki_btn_t1j':  { category: '🏃 Treadmill Only', label: '1 Jam', price: 2000 },
+                    'joki_btn_t3j':  { category: '🏃 Treadmill Only', label: '3 Jam', price: 5000 },
+                    'joki_btn_t6j':  { category: '🏃 Treadmill Only', label: '6 Jam', price: 10000 },
+                    'joki_btn_t12j': { category: '🏃 Treadmill Only', label: '12 Jam', price: 18000 },
+                    'joki_btn_t1h':  { category: '🏃 Treadmill Only', label: '1 Hari', price: 30000 },
+                    'joki_btn_t2h':  { category: '🏃 Treadmill Only', label: '2 Hari', price: 55000 },
+                    'joki_btn_t3h':  { category: '🏃 Treadmill Only', label: '3 Hari', price: 75000 },
+                    'joki_btn_t5h':  { category: '🏃 Treadmill Only', label: '5 Hari', price: 115000 },
+                    'joki_btn_t7h':  { category: '🏃 Treadmill Only', label: '7 Hari', price: 150000 },
+                    'joki_btn_t14h': { category: '🏃 Treadmill Only', label: '14 Hari', price: 280000 },
+                    'joki_btn_t21h': { category: '🏃 Treadmill Only', label: '21 Hari', price: 390000 },
+                    'joki_btn_t30h': { category: '🏃 Treadmill Only', label: '30 Hari', price: 500000 },
+                    'joki_btn_e1j':  { category: '🥚 Treadmill + Steal Egg', label: '1 Jam', price: 5000 },
+                    'joki_btn_e3j':  { category: '🥚 Treadmill + Steal Egg', label: '3 Jam', price: 14000 },
+                    'joki_btn_e6j':  { category: '🥚 Treadmill + Steal Egg', label: '6 Jam', price: 25000 },
+                    'joki_btn_e12j': { category: '🥚 Treadmill + Steal Egg', label: '12 Jam', price: 45000 },
+                    'joki_btn_e1h':  { category: '🥚 Treadmill + Steal Egg', label: '1 Hari', price: 80000 },
+                    'joki_btn_e2h':  { category: '🥚 Treadmill + Steal Egg', label: '2 Hari', price: 150000 },
+                    'joki_btn_e3h':  { category: '🥚 Treadmill + Steal Egg', label: '3 Hari', price: 220000 },
+                    'joki_btn_e5h':  { category: '🥚 Treadmill + Steal Egg', label: '5 Hari', price: 330000 },
+                    'joki_btn_e7h':  { category: '🥚 Treadmill + Steal Egg', label: '7 Hari', price: 450000 },
+                    'joki_btn_e14h': { category: '🥚 Treadmill + Steal Egg', label: '14 Hari', price: 850000 },
+                    'joki_btn_e21h': { category: '🥚 Treadmill + Steal Egg', label: '21 Hari', price: 1150000 },
+                    'joki_btn_e30h': { category: '🥚 Treadmill + Steal Egg', label: '30 Hari', price: 1500000 },
+                };
 
-                const selectMenu = new StringSelectMenuBuilder()
-                    .setCustomId(`joki_select_${type}`)
-                    .setPlaceholder(`Pilih durasi ${pricing.label}...`)
-                    .addOptions(
-                        pricing.options.map(opt => ({
-                            label: `${opt.label} — ${formatPrice(opt.price)}`,
-                            value: opt.value,
-                        }))
-                    );
+                const option = jokiMap[customId];
+                if (!option) return;
 
-                const row = new ActionRowBuilder().addComponents(selectMenu);
-
-                await interaction.reply({
-                    content: `Pilih durasi **${pricing.label}** yang kamu inginkan:`,
-                    components: [row],
-                    ephemeral: true
-                });
-            }
-
-            // 6. JOKI SELECT MENU - Create ticket channel
-            if (customId.startsWith('joki_select_')) {
-                const type = customId.replace('joki_select_', '');
-                const selectedValue = interaction.values[0];
-                const option = findJokiOption(selectedValue);
-                if (!option) return interaction.reply({ content: 'Invalid option!', ephemeral: true });
+                const formatPrice = (val) => 'Rp ' + val.toLocaleString('id-ID');
 
                 const ticketName = `joki-${user.username}`;
                 const existingTicket = guild.channels.cache.find(c => c.name === ticketName.toLowerCase());
@@ -499,6 +492,54 @@ module.exports = {
                 } catch (error) {
                     console.error('Failed to create channel:', error);
                     await interaction.editReply({ content: 'Failed to create ticket channel. Please contact an administrator.' });
+                }
+            }
+
+            // ADD USER MODAL
+            if (customId === 'add_user_modal') {
+                const userId = interaction.fields.getTextInputValue('user_id_input').replace(/[<@!>]/g, '').trim();
+
+                if (!/^\d+$/.test(userId)) {
+                    return interaction.reply({ content: 'ID tidak valid! Masukkan ID Discord yang benar.', ephemeral: true });
+                }
+
+                try {
+                    const memberToAdd = await guild.members.fetch(userId);
+
+                    await channel.permissionOverwrites.edit(memberToAdd.id, {
+                        ViewChannel: true,
+                        SendMessages: true,
+                        AttachFiles: true,
+                    });
+
+                    const oldEmbed = interaction.message.embeds[0];
+                    const embed = new EmbedBuilder()
+                        .setTitle(oldEmbed?.title || '🤝 Midman Ticket')
+                        .setColor(oldEmbed?.color || '#5865F2')
+                        .setDescription(oldEmbed?.description || '')
+                        .setTimestamp();
+
+                    if (oldEmbed?.fields) {
+                        for (const field of oldEmbed.fields) {
+                            embed.addFields({ name: field.name, value: field.value, inline: field.inline });
+                        }
+                    }
+
+                    embed.addFields({ name: '👤 User Ditambahkan', value: `${memberToAdd} (${memberToAdd.user.tag})`, inline: true });
+
+                    if (oldEmbed?.footer) embed.setFooter({ text: oldEmbed.footer.text });
+
+                    const row = new ActionRowBuilder()
+                        .addComponents(
+                            new ButtonBuilder().setCustomId('add_midman_user').setLabel('Add User').setStyle(ButtonStyle.Primary).setEmoji('👤'),
+                            new ButtonBuilder().setCustomId('close_ticket').setLabel('Close').setStyle(ButtonStyle.Danger).setEmoji('🔒'),
+                            new ButtonBuilder().setCustomId('cancel_ticket').setLabel('Cancel').setStyle(ButtonStyle.Secondary).setEmoji('✖️'),
+                        );
+
+                    await interaction.update({ embeds: [embed], components: [row] });
+                    await channel.send(`${memberToAdd} telah ditambahkan ke ticket oleh staff.`);
+                } catch (err) {
+                    return interaction.reply({ content: 'Gagal menambahkan user. Pastikan ID benar dan user ada di server.', ephemeral: true });
                 }
             }
         }
