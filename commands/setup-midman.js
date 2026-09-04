@@ -10,11 +10,30 @@ module.exports = {
         if (!channel) return interaction.reply({ content: 'Midman channel not found!', ephemeral: true });
 
         const embed = new EmbedBuilder()
-            .setTitle('🤝 Middleman Service')
+            .setTitle('🛡️ MIDMAN SYSHUB')
             .setColor('#2F3136')
-            .setDescription('Need a middleman for your transaction?\nClick the button below to open a ticket and a staff member will assist you shortly.')
+            .setDescription('> khusus transaksi uang asli (IDR)')
             .addFields(
-                { name: 'Rules', value: '• Do not ping staff repeatedly.\n• Be patient.\n• Have all transaction details ready.' }
+                {
+                    name: '💰 FEE',
+                    value: [
+                        '> 1K–99K — **2K**',
+                        '> 100K–199K — **5K**',
+                        '> 200K–299K — **10K**',
+                        '> 400K–599K — **15K**',
+                        '> 600K–899K — **20K**',
+                        '> 800K–1JT — **25K**',
+                        '> 1JT+ — **5%** dari total transaksi',
+                    ].join('\n')
+                },
+                {
+                    name: '⚠️ RULES',
+                    value: [
+                        '> • tidak menerima midman akun',
+                        '> • transaksi wajib melalui ticket resmi Syshub',
+                        '> • fee dibayar sebelum transaksi',
+                    ].join('\n')
+                }
             )
             .setFooter({ text: 'SysHub Middleman System' })
             .setTimestamp();

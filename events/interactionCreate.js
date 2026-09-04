@@ -380,8 +380,22 @@ module.exports = {
                 };
 
                 const priceVal = parsePrice(jumlahHargaStr);
-                const taxPercentage = priceVal < 200000 ? 10 : 5;
-                const taxAmount = Math.round(priceVal * (taxPercentage / 100));
+                let taxAmount = 0;
+                if (priceVal >= 1000000) {
+                    taxAmount = Math.round(priceVal * 0.05);
+                } else if (priceVal >= 800000) {
+                    taxAmount = 25000;
+                } else if (priceVal >= 600000) {
+                    taxAmount = 20000;
+                } else if (priceVal >= 400000) {
+                    taxAmount = 15000;
+                } else if (priceVal >= 200000) {
+                    taxAmount = 10000;
+                } else if (priceVal >= 100000) {
+                    taxAmount = 5000;
+                } else {
+                    taxAmount = 2000;
+                }
                 const totalAmount = priceVal + taxAmount;
 
                 const formatCurrency = (val) => {
@@ -453,7 +467,7 @@ module.exports = {
                         .setDescription(`Welcome ${user}!\nPlease describe your transaction details.\n\n${lawanInstruction}\n\n**Staff <@&${staffId}> must claim this ticket first.**`)
                         .addFields(
                             { name: '📋 Form Transaksi', value: `**Jenis Midman:** ${jenisMidman}\n**Jumlah Harga:** ${jumlahHargaStr}\n**Lawan Transaksi:** ${secondPerson ? `${secondPerson} (${secondPerson.user.tag})` : `\`${lawanInputStr}\``}` },
-                            { name: '💰 Rincian Biaya (Tax)', value: `**Harga Asli:** ${formatCurrency(priceVal)}\n**Pajak Midman (${taxPercentage}%):** ${formatCurrency(taxAmount)}\n**Total yang harus dibayar:** ${formatCurrency(totalAmount)}` }
+                            { name: '💰 Rincian Biaya (Fee)', value: `**Harga Asli:** ${formatCurrency(priceVal)}\n**Fee Midman:** ${formatCurrency(taxAmount)}\n**Total yang harus dibayar:** ${formatCurrency(totalAmount)}` }
                         )
                         .setFooter({ text: 'SysHub Middleman System' })
                         .setTimestamp();
@@ -475,7 +489,7 @@ module.exports = {
                                 { name: 'Channel', value: `${ticketChannel.name}`, inline: true },
                                 { name: 'Jenis Midman', value: jenisMidman, inline: true },
                                 { name: 'Harga', value: formatCurrency(priceVal), inline: true },
-                                { name: 'Pajak', value: `${formatCurrency(taxAmount)} (${taxPercentage}%)`, inline: true },
+                                { name: 'Fee', value: formatCurrency(taxAmount), inline: true },
                                 { name: 'Total', value: formatCurrency(totalAmount), inline: true },
                                 { name: 'Lawan Transaksi', value: secondPerson ? `${secondPerson.user.tag} (${secondPerson.id})` : lawanInputStr, inline: true }
                             )
