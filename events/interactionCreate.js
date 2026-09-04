@@ -3,6 +3,7 @@ const { getEmbed, getButtons } = require('../utils/welcomeEmbed');
 
 const JOKI_TICKET_LOG_CHANNEL = '1545265772731957388';
 const JOKI_CATEGORY_ID = '1545263915158478898';
+const JOKI_ROLE_ID = '1498652010977824919';
 
 async function generateTranscript(channel) {
     let messages = [];
@@ -270,7 +271,7 @@ module.exports = {
                         );
                     });
 
-                    await ticketChannel.send({ content: `${user} | <@&${staffId}>`, embeds: [preEmbed], components: rows });
+                    await ticketChannel.send({ content: `${user} | <@&${JOKI_ROLE_ID}>`, embeds: [preEmbed], components: rows });
                     await interaction.editReply({ content: `Ticket created: ${ticketChannel}` });
 
                     const jokiLogChannel = guild.channels.cache.get(JOKI_TICKET_LOG_CHANNEL);
