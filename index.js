@@ -16,7 +16,7 @@ const client = new Client({
 
 client.commands = new Collection();
 client.prefixCommands = new Collection();
-client.prefixes = ['sys', 'syshub', 'sh', '.', '?', '!'];
+client.prefixes = ['!'];
 
 // Slash Command Handler
 const commandsPath = path.join(__dirname, 'commands');

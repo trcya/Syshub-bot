@@ -1,13 +1,15 @@
-const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, PermissionFlagsBits } = require('discord.js');
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, PermissionFlagsBits } = require('discord.js');
 
 module.exports = {
-    data: new SlashCommandBuilder()
-        .setName('setup-joki')
-        .setDescription('Send the Joki AFK Roblox Ticket Panel')
-        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
-    async execute(interaction) {
-        const channel = interaction.guild.channels.cache.get('1494149119256690698');
-        if (!channel) return interaction.reply({ content: 'Channel not found!', ephemeral: true });
+    name: 'setup-joki',
+    description: 'Send the Joki AFK Roblox Ticket Panel',
+    async execute(message, args) {
+        if (!message.member.permissions.has(PermissionFlagsBits.Administrator)) {
+            return message.reply('You need Administrator permission to use this command!');
+        }
+
+        const channel = message.guild.channels.cache.get('1494149119256690698');
+        if (!channel) return message.reply('Channel not found!');
 
         const embed = new EmbedBuilder()
             .setTitle('🤖 JOKI AFK ROBLOX')
@@ -49,6 +51,6 @@ module.exports = {
             );
 
         await channel.send({ embeds: [embed], components: [row] });
-        await interaction.reply({ content: 'Joki Panel has been sent!', ephemeral: true });
+        await message.reply('Joki Panel has been sent!');
     },
 };
