@@ -1,7 +1,9 @@
 #!/bin/bash
 echo "=== Updating SysHub Bot ==="
 
+git stash
 git pull origin main
+git stash pop || true
 npm install
 
 echo "=== Restarting bot... ==="
