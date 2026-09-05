@@ -1,13 +1,45 @@
 {
     "games": [
-        { "name": "Abyss", "status": "discontinue", "note": "Discontinue" },
-        { "name": "Craft a World", "status": "discontinue", "note": "Discontinue" },
-        { "name": "Garden Horizons", "status": "discontinue", "note": "Discontinue" },
-        { "name": "The Forge", "status": "discontinue", "note": "Discontinue" },
-        { "name": "Fish It", "status": "ready" },
-        { "name": "Mine a Mountain", "status": "ready" },
-        { "name": "Steal An Egg", "status": "ready" },
-        { "name": "Grow a chicken fighter", "status": "waiting", "note": "soon" },
-        { "name": "Violence District", "status": "waiting", "note": "soon" }
+        {
+            "name": "Abyss",
+            "status": "discontinue",
+            "note": "Discontinue"
+        },
+        {
+            "name": "Craft a World",
+            "status": "discontinue",
+            "note": "Discontinue"
+        },
+        {
+            "name": "Garden Horizons",
+            "status": "discontinue",
+            "note": "Discontinue"
+        },
+        {
+            "name": "The Forge",
+            "status": "discontinue",
+            "note": "Discontinue"
+        },
+        {
+            "name": "Fish It",
+            "status": "ready"
+        },
+        {
+            "name": "Mine a Mountain",
+            "status": "ready"
+        },
+        {
+            "name": "Steal An Egg",
+            "status": "ready"
+        },
+        {
+            "name": "Grow a chicken fighter",
+            "status": "waiting",
+            "note": "soon"
+        },
+        {
+            "name": "Violence District",
+            "status": "ready"
+        }
     ]
 }
