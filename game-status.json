@@ -33,13 +33,13 @@
             "status": "ready"
         },
         {
+            "name": "Violence District",
+            "status": "ready"
+        },
+        {
             "name": "Grow a chicken fighter",
             "status": "waiting",
             "note": "soon"
-        },
-        {
-            "name": "Violence District",
-            "status": "ready"
         }
     ]
 }
