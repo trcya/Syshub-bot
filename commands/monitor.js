@@ -77,15 +77,14 @@ module.exports = {
             const exists = db.find(item =>
                 item.platform === platform &&
                 item.handle.toLowerCase() === handle.toLowerCase() &&
-                item.contentType === contentType &&
-                item.guildId === interaction.guildId
+                item.contentType === contentType
             );
 
             if (exists) {
                 return interaction.reply({ content: `Akun **${handle}** (${platform} - ${contentType}) sudah dipantau di channel <#${exists.discordChannelId}>!`, ephemeral: true });
             }
 
-            db.push({ platform, handle, contentType, discordChannelId: channel.id, guildId: interaction.guildId, lastStreamId: null, offlineCount: 0 });
+            db.push({ platform, handle, contentType, discordChannelId: channel.id, lastStreamId: null, offlineCount: 0 });
             writeDb(db);
             return interaction.reply({ content: `Berhasil mendaftarkan pemantauan **${handle}** (${platform} - ${contentType}) ke channel <#${channel.id}>!`, ephemeral: true });
 
@@ -98,7 +97,7 @@ module.exports = {
 
             const initialLength = db.length;
             const filteredDb = db.filter(item =>
-                !(item.platform === platform && item.handle.toLowerCase() === handle.toLowerCase() && item.contentType === contentType && item.guildId === interaction.guildId)
+                !(item.platform === platform && item.handle.toLowerCase() === handle.toLowerCase() && item.contentType === contentType)
             );
 
             if (filteredDb.length === initialLength) {
@@ -109,7 +108,7 @@ module.exports = {
             return interaction.reply({ content: `Berhasil menghapus pemantauan untuk **${handle}** (${platform} - ${contentType}).`, ephemeral: true });
 
         } else if (subcommand === 'list') {
-            const serverMonitors = db.filter(item => item.guildId === interaction.guildId);
+            const serverMonitors = db;
             if (serverMonitors.length === 0) {
                 return interaction.reply({ content: 'Belum ada akun yang dipantau. Gunakan `/monitor add` untuk memulai!', ephemeral: true });
             }

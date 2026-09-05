@@ -3,7 +3,9 @@ const { getEmbed, getButtons } = require('../utils/welcomeEmbed');
 
 const JOKI_TICKET_LOG_CHANNEL = '1545265772731957388';
 const JOKI_CATEGORY_ID = '1545263915158478898';
-const JOKI_ROLE_ID = '1498652010977824919';
+const JOKI_ROLE_ID = '1498652236257951764';
+
+const jokiTimeouts = new Map();
 
 async function generateTranscript(channel) {
     let messages = [];
@@ -231,7 +233,7 @@ module.exports = {
                     const preEmbed = new EmbedBuilder()
                         .setTitle(`${serviceEmoji} Joki ${serviceType}`)
                         .setColor('#5865F2')
-                        .setDescription(`Welcome ${user}!\nStaff akan segera membantu kamu.\n\nPilih durasi yang kamu inginkan:`)
+                        .setDescription(`Welcome ${user}!\nStaff akan segera membantu kamu.\n\nPilih durasi yang kamu inginkan:\n\n⚠️ **Jika tidak memilih durasi dalam 10 jam, kamu akan di-timeout selama 2 jam!**`)
                         .setFooter({ text: 'SysHub Joki Service' })
                         .setTimestamp();
 
@@ -271,8 +273,30 @@ module.exports = {
                         );
                     });
 
+                    const closeRow = new ActionRowBuilder().addComponents(
+                        new ButtonBuilder().setCustomId('close_joki_ticket').setLabel('Close Ticket').setStyle(ButtonStyle.Danger).setEmoji('✖️'),
+                    );
+                    rows.push(closeRow);
+
                     await ticketChannel.send({ content: `${user} | <@&${JOKI_ROLE_ID}>`, embeds: [preEmbed], components: rows });
                     await interaction.editReply({ content: `Ticket created: ${ticketChannel}` });
+
+                    const timeoutKey = ticketChannel.id;
+                    const timeoutMs = 10 * 60 * 60 * 1000;
+                    const timeoutDuration = 2 * 60 * 60 * 1000;
+
+                    const timeoutId = setTimeout(async () => {
+                        jokiTimeouts.delete(timeoutKey);
+                        try {
+                            const memberToTimeout = await guild.members.fetch(user.id);
+                            await memberToTimeout.timeout(timeoutDuration, 'Tidak memilih durasi joki dalam 10 jam');
+                            await ticketChannel.send(`⚠️ ${user} telah di-timeout selama 2 jam karena tidak memilih durasi dalam 10 jam.`);
+                        } catch (err) {
+                            console.error('Failed to timeout user:', err);
+                        }
+                    }, timeoutMs);
+
+                    jokiTimeouts.set(timeoutKey, timeoutId);
 
                     const jokiLogChannel = guild.channels.cache.get(JOKI_TICKET_LOG_CHANNEL);
                     if (jokiLogChannel) {
@@ -321,6 +345,12 @@ module.exports = {
                 const opt = jokiDurMap[customId];
                 if (!opt) return;
 
+                const timeoutKey = channel.id;
+                if (jokiTimeouts.has(timeoutKey)) {
+                    clearTimeout(jokiTimeouts.get(timeoutKey));
+                    jokiTimeouts.delete(timeoutKey);
+                }
+
                 const formatPrice = (v) => 'Rp ' + v.toLocaleString('id-ID');
                 const isEgg = customId.includes('egg');
                 const serviceType = isEgg ? '🥚 Treadmill + Steal Egg' : '🏃 Treadmill Only';
@@ -353,6 +383,12 @@ module.exports = {
             if (customId === 'close_joki_ticket') {
                 if (!member.roles.cache.has(staffId) && user.id !== staffId) {
                     return interaction.reply({ content: 'Only staff can close tickets!', ephemeral: true });
+                }
+
+                const timeoutKey = channel.id;
+                if (jokiTimeouts.has(timeoutKey)) {
+                    clearTimeout(jokiTimeouts.get(timeoutKey));
+                    jokiTimeouts.delete(timeoutKey);
                 }
 
                 await interaction.reply('Closing ticket and generating transcript...');
