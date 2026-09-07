@@ -202,11 +202,22 @@ module.exports = {
 
             // === JOKI TICKET HANDLERS ===
 
-            // 5. JOKI TREADMILL / TREADMILL+EGG BUTTON - Create ticket
-            if (customId === 'joki_treadmill' || customId === 'joki_treadmill_egg') {
+            // 5. JOKI TREADMILL / TREADMILL+EGG / REBIRTH BUTTON - Create ticket
+            if (customId === 'joki_treadmill' || customId === 'joki_treadmill_egg' || customId === 'joki_rebirth') {
                 const isEgg = customId === 'joki_treadmill_egg';
-                const serviceType = isEgg ? 'Treadmill + Steal Egg' : 'Treadmill Only';
-                const serviceEmoji = isEgg ? '🥚' : '🏃';
+                const isRebirth = customId === 'joki_rebirth';
+                let serviceType, serviceEmoji;
+
+                if (isRebirth) {
+                    serviceType = 'Rebirth';
+                    serviceEmoji = '🔄';
+                } else if (isEgg) {
+                    serviceType = 'Treadmill + Steal Egg';
+                    serviceEmoji = '🥚';
+                } else {
+                    serviceType = 'Treadmill Only';
+                    serviceEmoji = '🏃';
+                }
 
                 const ticketName = `joki-${user.username}`;
                 const existingTicket = guild.channels.cache.find(c => c.name === ticketName.toLowerCase());
@@ -265,13 +276,29 @@ module.exports = {
                         { id: 'joki_dur_egg_21h', label: '21 Hari — 400K' },
                         { id: 'joki_dur_egg_30h', label: '30 Hari — 500K' },
                     ];
+                    const rBtns1 = [
+                        { id: 'joki_dur_r1',   label: '1 Rebirth — 1K' },
+                        { id: 'joki_dur_r10',  label: '10 Rebirth — 9K' },
+                    ];
+                    const rBtns2 = [
+                        { id: 'joki_dur_r50',  label: '50 Rebirth — 40K' },
+                        { id: 'joki_dur_r100', label: '100 Rebirth — 80K' },
+                    ];
 
-                    const btns = isEgg ? [eBtns1, eBtns2] : [tBtns1, tBtns2];
-                    const rows = btns.map(pair => {
-                        return new ActionRowBuilder().addComponents(
-                            pair.map(b => new ButtonBuilder().setCustomId(b.id).setLabel(b.label).setStyle(isEgg ? ButtonStyle.Success : ButtonStyle.Primary))
+                    const rows = [];
+                    if (isRebirth) {
+                        rows.push(
+                            new ActionRowBuilder().addComponents(rBtns1.map(b => new ButtonBuilder().setCustomId(b.id).setLabel(b.label).setStyle(ButtonStyle.Secondary))),
+                            new ActionRowBuilder().addComponents(rBtns2.map(b => new ButtonBuilder().setCustomId(b.id).setLabel(b.label).setStyle(ButtonStyle.Secondary))),
                         );
-                    });
+                    } else {
+                        const btns = isEgg ? [eBtns1, eBtns2] : [tBtns1, tBtns2];
+                        rows.push(
+                            ...btns.map(pair => new ActionRowBuilder().addComponents(
+                                pair.map(b => new ButtonBuilder().setCustomId(b.id).setLabel(b.label).setStyle(isEgg ? ButtonStyle.Success : ButtonStyle.Primary))
+                            ))
+                        );
+                    }
 
                     const closeRow = new ActionRowBuilder().addComponents(
                         new ButtonBuilder().setCustomId('close_joki_ticket').setLabel('Close Ticket').setStyle(ButtonStyle.Danger).setEmoji('✖️'),
@@ -340,6 +367,10 @@ module.exports = {
                     'joki_dur_egg_14h':  { label: '14 Hari', price: 300000 },
                     'joki_dur_egg_21h':  { label: '21 Hari', price: 400000 },
                     'joki_dur_egg_30h':  { label: '30 Hari', price: 500000 },
+                    'joki_dur_r1':       { label: '1 Rebirth', price: 1000 },
+                    'joki_dur_r10':      { label: '10 Rebirth', price: 9000 },
+                    'joki_dur_r50':      { label: '50 Rebirth', price: 40000 },
+                    'joki_dur_r100':     { label: '100 Rebirth', price: 80000 },
                 };
 
                 const opt = jokiDurMap[customId];
@@ -353,8 +384,19 @@ module.exports = {
 
                 const formatPrice = (v) => 'Rp ' + v.toLocaleString('id-ID');
                 const isEgg = customId.includes('egg');
-                const serviceType = isEgg ? '🥚 Treadmill + Steal Egg' : '🏃 Treadmill Only';
-                const color = isEgg ? '#57F287' : '#5865F2';
+                const isRebirth = customId.startsWith('joki_dur_r');
+                let serviceType, color;
+
+                if (isRebirth) {
+                    serviceType = '🔄 Rebirth';
+                    color = '#FFD700';
+                } else if (isEgg) {
+                    serviceType = '🥚 Treadmill + Steal Egg';
+                    color = '#57F287';
+                } else {
+                    serviceType = '🏃 Treadmill Only';
+                    color = '#5865F2';
+                }
 
                 const oldEmbed = interaction.message.embeds[0];
                 const embed = new EmbedBuilder()
