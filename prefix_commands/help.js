@@ -9,10 +9,11 @@ module.exports = {
             .setColor('#2F3136')
             .setDescription('Berikut adalah command yang tersedia.')
             .addFields(
-                { name: 'Prefix', value: '`!`', inline: false },
+                { name: 'Prefix', value: '`!` / `.`', inline: false },
                 { name: 'Prefix Commands', value: [
-                    '`!help` — Tampilkan menu ini',
-                    '`!setup-joki` — Kirim panel Joki AFK',
+                    '`!help` / `.help` — Tampilkan menu ini',
+                    '`!setup-joki` / `.setup-joki` — Kirim panel Joki AFK',
+                    '`.payqris` — Tampilkan QRIS pembayaran',
                 ].join('\n'), inline: false },
                 { name: 'Slash Commands', value: [
                     '`/ping` — Cek latensi bot',

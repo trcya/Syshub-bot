@@ -369,22 +369,13 @@ async function checkTiktokLiveFallback(username) {
 // ============ TIKTOK CONTENT (VIDEOS) ============
 
 async function checkTiktokContent(username) {
-    // Primary: tiktok-live-connector (check if currently live = new content)
     const conn = getTiktokConnection(username);
     if (conn) {
         try {
             const isLive = await conn.fetchIsLive();
             if (isLive) {
-                const roomInfo = await conn.fetchRoomInfo();
-                return {
-                    isLive: true,
-                    videoId: roomInfo?.room_id || roomInfo?.id_str || `live_${username}`,
-                    title: roomInfo?.title || roomInfo?.room_title || 'Live di TikTok',
-                    channelName: roomInfo?.owner?.nickname || username,
-                    avatarUrl: roomInfo?.owner?.avatar_thumb?.url_list?.[0] || null,
-                    thumbnailUrl: roomInfo?.cover?.url_list?.[0] || null,
-                    streamUrl: `https://www.tiktok.com/@${username}/live`
-                };
+                console.log(`[TIKTOK CONTENT] ${username}: currently live, skipping video check`);
+                return { isLive: false };
             }
         } catch (e) {
             const errMsg = e.message || String(e);
@@ -394,10 +385,14 @@ async function checkTiktokContent(username) {
         }
     }
 
-    // Fallback: TikTok page scraping (__UNIVERSAL_DATA_FOR_REHYDRATION__)
     try {
         const res = await fetchWithTimeout(`https://www.tiktok.com/@${username}`, {
-            headers: { 'User-Agent': UA, 'Accept-Language': 'en-US,en;q=0.9' }
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                'Accept-Language': 'en-US,en;q=0.9',
+                'Referer': 'https://www.tiktok.com/'
+            }
         }, 20000);
         if (!res.ok) {
             console.log(`[TIKTOK CONTENT] ${username}: HTTP ${res.status}`);
@@ -410,7 +405,6 @@ async function checkTiktokContent(username) {
         let avatarUrl = null;
         let latestVideo = null;
 
-        // Strategy 1: __UNIVERSAL_DATA_FOR_REHYDRATION__
         const universalMatch = html.match(/<script id="__UNIVERSAL_DATA_FOR_REHYDRATION__"[^>]*>([\s\S]*?)<\/script>/);
         if (universalMatch) {
             try {
@@ -423,15 +417,33 @@ async function checkTiktokContent(username) {
                 }
                 const userPost = scope?.['webapp.user-post']?.itemList;
                 if (Array.isArray(userPost) && userPost.length > 0) {
-                    latestVideo = userPost[0];
+                    for (const item of userPost) {
+                        const vid = item.id || item.idStr;
+                        if (vid && !String(vid).startsWith('live_')) {
+                            latestVideo = { id: vid, desc: item.desc || item.description || '' };
+                            break;
+                        }
+                    }
                 }
             } catch (_) {}
         }
 
-        // Strategy 2: regex extraction of video IDs
         if (!latestVideo) {
-            const videoIdMatches = [...html.matchAll(/"id"\s*:\s*"(\d{15,})"/g)];
-            const videoIds = [...new Set(videoIdMatches.map(m => m[1]))].slice(0, 5);
+            const urlMatches = [...html.matchAll(/\/video\/(\d{10,})/g)];
+            const videoIds = [...new Set(urlMatches.map(m => m[1]))].slice(0, 10);
+            for (const videoId of videoIds) {
+                const idx = html.indexOf(`/video/${videoId}`);
+                if (idx === -1) continue;
+                const sub = html.substring(Math.max(0, idx - 1000), idx + 2000);
+                const descMatch = sub.match(/"desc"\s*:\s*"([^"]*?)"/);
+                latestVideo = { id: videoId, desc: descMatch ? descMatch[1] : 'New TikTok Video' };
+                break;
+            }
+        }
+
+        if (!latestVideo) {
+            const videoIdMatches = [...html.matchAll(/"id"\s*:\s*"(\d{10,})"/g)];
+            const videoIds = [...new Set(videoIdMatches.map(m => m[1]))].slice(0, 10);
             for (const videoId of videoIds) {
                 const idx = html.indexOf(`"${videoId}"`);
                 if (idx === -1) continue;
@@ -444,7 +456,6 @@ async function checkTiktokContent(username) {
             }
         }
 
-        // Fill nickname/avatar from raw HTML if not set
         if (!channelName || channelName === username) {
             const nm = html.match(/"nickname":"([^"]+)"/);
             if (nm) channelName = nm[1];
@@ -462,7 +473,6 @@ async function checkTiktokContent(username) {
         const videoId = latestVideo.id;
         const desc = latestVideo.desc || 'New TikTok Video';
 
-        // Try to extract thumbnail from surrounding HTML
         let thumbnailUrl = null;
         const coverMatch = html.match(new RegExp(`"${videoId}"[\\s\\S]{0,3000}?"cover"\\s*:\\s*\\{[^}]*"url"\\s*:\\s*"([^"]+)"`));
         const dynamicCoverMatch = html.match(new RegExp(`"${videoId}"[\\s\\S]{0,3000}?"dynamicCover"\\s*:\\s*\\{[^}]*"url"\\s*:\\s*"([^"]+)"`));
@@ -603,7 +613,7 @@ module.exports = {
                             .setEmoji(isYT ? '🎬' : '🎵')
                     );
 
-                    await targetChannel.send({ content: contentAlert, embeds: [embed], components: [row] });
+                    await targetChannel.send({ content: `@everyone ${contentAlert}`, embeds: [embed], components: [row] });
                     console.log(`[MONITOR] Alert sent: ${item.handle} (${item.platform} - ${cType}) -> ${targetChannelId}`);
 
                     db[i].lastStreamId = status.videoId;
