@@ -28,9 +28,14 @@ Welcome to **SysHub**! Please access the channels below:
 > Buy premium at <#1494149019864137780> or visit [syshub.site](https://syshub.site)`;
 }
 
+function getStickyTextVerify() {
+    return `# 🛑 Gabisa Verify? Chat Disini`;
+}
+
 const STICKY_CHANNELS = {
     '1494149400052633671': { lang: 'id' },
-    '1494149497360617553': { lang: 'en' }
+    '1494149497360617553': { lang: 'en' },
+    '1546462500273262663': { lang: 'verify' }
 };
 
 const lastStickyMessage = new Map();
@@ -56,7 +61,10 @@ module.exports = {
                 }
             }
 
-            const content = sticky.lang === 'en' ? getStickyTextEn() : getStickyTextId();
+            let content;
+            if (sticky.lang === 'en') content = getStickyTextEn();
+            else if (sticky.lang === 'verify') content = getStickyTextVerify();
+            else content = getStickyTextId();
             const newMsg = await message.channel.send({ content });
             lastStickyMessage.set(message.channel.id, newMsg.id);
         } catch (error) {
