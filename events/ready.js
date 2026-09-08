@@ -2,6 +2,7 @@ const { Events, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = r
 const { updateStats } = require('../utils/statsManager');
 const { sendOrUpdateStatus } = require('../utils/statusBuilder');
 const { sendOrUpdateGameStatus } = require('../utils/gameStatusBuilder');
+const { initStickyNotes } = require('./stickyNote');
 const fs = require('fs');
 const path = require('path');
 
@@ -508,6 +509,8 @@ module.exports = {
         await sendOrUpdateGameStatus(client);
         await updateStats(client, true);
         setInterval(() => { updateStats(client); }, 10 * 60 * 1000);
+
+        await initStickyNotes(client);
 
         console.log('[MONITOR] Menyalakan sistem monitoring...');
 

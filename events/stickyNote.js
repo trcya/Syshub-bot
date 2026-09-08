@@ -41,8 +41,29 @@ const STICKY_CHANNELS = {
 const lastStickyMessage = new Map();
 const processing = new Set();
 
+async function initStickyNotes(client) {
+    for (const [channelId, config] of Object.entries(STICKY_CHANNELS)) {
+        try {
+            const channel = await client.channels.fetch(channelId).catch(() => null);
+            if (!channel) continue;
+
+            const messages = await channel.messages.fetch({ limit: 20 }).catch(() => null);
+            if (!messages) continue;
+
+            const lastBotMsg = messages.find(m => m.author.id === client.user.id);
+            if (lastBotMsg) {
+                lastStickyMessage.set(channelId, lastBotMsg.id);
+                console.log(`[StickyNote] Loaded existing sticky in ${channelId}: ${lastBotMsg.id}`);
+            }
+        } catch (err) {
+            console.error(`[StickyNote] Failed init channel ${channelId}:`, err.message);
+        }
+    }
+}
+
 module.exports = {
     name: Events.MessageCreate,
+    initStickyNotes,
     async execute(message) {
         if (message.author.bot || !message.guild) return;
 
