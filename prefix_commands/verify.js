@@ -1,19 +1,18 @@
-const { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, AttachmentBuilder } = require('discord.js');
-const { generateCaptcha, generateCaptchaImage } = require('../utils/captcha');
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, PermissionFlagsBits } = require('discord.js');
 
 const VERIFY_CHANNEL = '1546462500273262663';
-const VERIFY_ROLE = '1494143210157510666';
 
 module.exports = {
-    data: new SlashCommandBuilder()
-        .setName('verify')
-        .setDescription('Kirim panel verifikasi ke channel')
-        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
+    name: 'verify',
+    description: 'Kirim panel verifikasi ke channel',
+    async execute(message, args) {
+        if (!message.member.permissions.has(PermissionFlagsBits.Administrator)) {
+            return message.reply('Kamu tidak punya izin untuk menggunakan command ini!');
+        }
 
-    async execute(interaction) {
-        const channel = await interaction.guild.channels.fetch(VERIFY_CHANNEL);
+        const channel = await message.guild.channels.fetch(VERIFY_CHANNEL);
         if (!channel) {
-            return interaction.reply({ content: 'Channel verifikasi tidak ditemukan!', ephemeral: true });
+            return message.reply('Channel verifikasi tidak ditemukan!');
         }
 
         const embed = new EmbedBuilder()
@@ -33,6 +32,6 @@ module.exports = {
             );
 
         await channel.send({ embeds: [embed], components: [row] });
-        return interaction.reply({ content: `Panel verifikasi berhasil dikirim ke <#${VERIFY_CHANNEL}>!`, ephemeral: true });
+        await message.reply(`Panel verifikasi berhasil dikirim ke <#${VERIFY_CHANNEL}>!`);
     },
 };
