@@ -70,30 +70,64 @@ module.exports = {
                     return interaction.reply({ content: 'Kamu sudah terverifikasi!', ephemeral: true });
                 }
 
-                const code = generateCaptcha(5);
+                const code = generateCaptcha(4);
                 pendingVerifications.set(user.id, { code, expiresAt: Date.now() + 5 * 60 * 1000 });
 
                 const buffer = generateCaptchaImage(code);
                 const attachment = new AttachmentBuilder(buffer, { name: 'captcha.png' });
 
-                const embed = new EmbedBuilder()
-                    .setTitle('🔐 Solve the Captcha')
-                    .setDescription('Enter the 5 characters shown below. You have 5 minutes.')
-                    .setColor('#2F3136')
-                    .setImage('attachment://captcha.png')
-                    .setFooter({ text: 'SysHub Verification' })
-                    .setTimestamp();
+                const container = {
+                    flags: 32768,
+                    components: [
+                        {
+                            type: 17,
+                            components: [
+                                {
+                                    type: 10,
+                                    content: '## Solve the captcha'
+                                },
+                                {
+                                    type: 14,
+                                    divider: true,
+                                    spacing: 1
+                                },
+                                {
+                                    type: 10,
+                                    content: 'Enter the 4 digits shown below. You have 5 minutes.'
+                                },
+                                {
+                                    type: 14,
+                                    divider: true,
+                                    spacing: 1
+                                },
+                                {
+                                    type: 13,
+                                    media: {
+                                        url: 'attachment://captcha.png'
+                                    }
+                                },
+                                {
+                                    type: 14,
+                                    divider: true,
+                                    spacing: 1
+                                },
+                                {
+                                    type: 1,
+                                    components: [
+                                        {
+                                            type: 2,
+                                            custom_id: 'verify_enter',
+                                            label: 'Enter code',
+                                            style: 1
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                };
 
-                const row = new ActionRowBuilder()
-                    .addComponents(
-                        new ButtonBuilder()
-                            .setCustomId('verify_enter')
-                            .setLabel('Enter Code')
-                            .setStyle(ButtonStyle.Primary)
-                            .setEmoji('✏️')
-                    );
-
-                return interaction.reply({ embeds: [embed], components: [row], files: [attachment], ephemeral: true });
+                return interaction.reply({ ...container, files: [attachment], ephemeral: true });
             }
 
             if (customId === 'verify_enter') {
@@ -112,11 +146,11 @@ module.exports = {
 
                 const input = new TextInputBuilder()
                     .setCustomId('verify_code_input')
-                    .setLabel('Masukkan 5 karakter dari captcha')
+                    .setLabel('Masukkan 4 digit dari captcha')
                     .setStyle(TextInputStyle.Short)
-                    .setMinLength(5)
-                    .setMaxLength(5)
-                    .setPlaceholder('Contoh: aB3xZ')
+                    .setMinLength(4)
+                    .setMaxLength(4)
+                    .setPlaceholder('Contoh: 4536')
                     .setRequired(true);
 
                 const actionRow = new ActionRowBuilder().addComponents(input);

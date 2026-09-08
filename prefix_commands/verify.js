@@ -1,4 +1,4 @@
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, PermissionFlagsBits } = require('discord.js');
+const { PermissionFlagsBits } = require('discord.js');
 
 const VERIFY_CHANNEL = '1546462500273262663';
 
@@ -15,23 +15,47 @@ module.exports = {
             return message.reply('Channel verifikasi tidak ditemukan!');
         }
 
-        const embed = new EmbedBuilder()
-            .setTitle('🔐 Verifikasi Akun')
-            .setDescription('Klik tombol di bawah untuk memulai verifikasi.\nKamu akan mendapatkan captcha berupa 5 karakter (huruf/angka).\nMasukkan kode yang benar untuk mendapatkan akses server.')
-            .setColor('#2F3136')
-            .setFooter({ text: 'SysHub Verification' })
-            .setTimestamp();
+        const container = {
+            flags: 32768,
+            components: [
+                {
+                    type: 17,
+                    components: [
+                        {
+                            type: 10,
+                            content: '## Verify yourself'
+                        },
+                        {
+                            type: 14,
+                            divider: true,
+                            spacing: 1
+                        },
+                        {
+                            type: 10,
+                            content: 'Click the button below and solve the short captcha to unlock the server.'
+                        },
+                        {
+                            type: 14,
+                            divider: true,
+                            spacing: 1
+                        },
+                        {
+                            type: 1,
+                            components: [
+                                {
+                                    type: 2,
+                                    custom_id: 'verify_start',
+                                    label: 'Verify',
+                                    style: 3
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        };
 
-        const row = new ActionRowBuilder()
-            .addComponents(
-                new ButtonBuilder()
-                    .setCustomId('verify_start')
-                    .setLabel('Verify')
-                    .setStyle(ButtonStyle.Success)
-                    .setEmoji('✅')
-            );
-
-        await channel.send({ embeds: [embed], components: [row] });
+        await channel.send(container);
         await message.reply(`Panel verifikasi berhasil dikirim ke <#${VERIFY_CHANNEL}>!`);
     },
 };
