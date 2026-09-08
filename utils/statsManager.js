@@ -29,12 +29,22 @@ const runUpdate = async (client) => {
             });
         }
 
-        // Fetch all members to ensure role member cache is fully accurate
-        await guild.members.fetch();
+        // Fetch all members and channels to ensure caches are fully accurate
+        await Promise.all([
+            guild.members.fetch(),
+            guild.channels.fetch(),
+        ]);
 
         // Stats Data
         const allMembersCount = guild.memberCount.toLocaleString();
-        const channelsCount = guild.channels.cache.size.toLocaleString();
+        const channelsCount = guild.channels.cache.filter(c =>
+            c.type === ChannelType.GuildText ||
+            c.type === ChannelType.GuildVoice ||
+            c.type === ChannelType.GuildAnnouncement ||
+            c.type === ChannelType.GuildStageVoice ||
+            c.type === ChannelType.GuildForum ||
+            c.type === ChannelType.GuildMedia
+        ).size.toLocaleString();
         const premiumRole = guild.roles.cache.get(process.env.PREMIUM_ROLE_ID);
         const premiumCount = premiumRole ? premiumRole.members.size.toLocaleString() : '0';
 
