@@ -1,5 +1,6 @@
-const { Events, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, PermissionFlagsBits, ChannelType, ModalBuilder, TextInputBuilder, TextInputStyle } = require('discord.js');
+const { Events, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, PermissionFlagsBits, ChannelType, ModalBuilder, TextInputBuilder, TextInputStyle, AttachmentBuilder } = require('discord.js');
 const { getEmbed, getButtons } = require('../utils/welcomeEmbed');
+const path = require('path');
 
 const JOKI_TICKET_LOG_CHANNEL = '1545265772731957388';
 const JOKI_CATEGORY_ID = '1545263915158478898';
@@ -419,6 +420,17 @@ module.exports = {
                 await interaction.update({ embeds: [embed], components: [row] });
 
                 await channel.send(`${user} memilih **${serviceType}** durasi **${opt.label}** — **${formatPrice(opt.price)}**`);
+
+                const qrisPath = path.join(__dirname, '..', 'image.png');
+                const qrisAttachment = new AttachmentBuilder(qrisPath, { name: 'qris.png' });
+                const qrisEmbed = new EmbedBuilder()
+                    .setTitle('💳 Pembayaran QRIS')
+                    .setDescription(`Scan QRIS di bawah untuk melakukan pembayaran sebesar **${formatPrice(opt.price)}**.`)
+                    .setColor('#FF0000')
+                    .setImage('attachment://qris.png')
+                    .setFooter({ text: 'SysHub Joki Service' })
+                    .setTimestamp();
+                await channel.send({ embeds: [qrisEmbed], files: [qrisAttachment] });
             }
 
             // 7. CLOSE JOKI TICKET - Transcript + Delete
