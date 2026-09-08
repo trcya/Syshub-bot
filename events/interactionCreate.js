@@ -1,6 +1,7 @@
 const { Events, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, PermissionFlagsBits, ChannelType, ModalBuilder, TextInputBuilder, TextInputStyle, AttachmentBuilder } = require('discord.js');
 const { getEmbed, getButtons } = require('../utils/welcomeEmbed');
 const { generateCaptcha, generateCaptchaImage } = require('../utils/captcha');
+const QRCode = require('qrcode');
 const path = require('path');
 
 const JOKI_TICKET_LOG_CHANNEL = '1545265772731957388';
@@ -506,10 +507,14 @@ module.exports = {
                     const payData = await payRes.json();
 
                     if (payData.payment) {
+                        const qrBuffer = await QRCode.toBuffer(payData.payment.payment_number, { width: 400, margin: 2 });
+                        const qrAttachment = new AttachmentBuilder(qrBuffer, { name: 'qris.png' });
+
                         const payEmbed = new EmbedBuilder()
                             .setTitle('💳 Pembayaran via Pakasir')
-                            .setDescription(`Silakan bayar sebesar **${formatPrice(payData.payment.total_payment)}** (termasuk fee).\n\nOrder ID: \`${orderId}\`\n\nLink pembayaran: [Klik disini](https://app.pakasir.com/pay/${process.env.PAKASIR_PROJECT}/${opt.price}?order_id=${orderId})\n\nSetelah pembayaran berhasil, silakan isi form akun di bawah ini.`)
+                            .setDescription(`Scan QR di bawah untuk melakukan pembayaran sebesar **${formatPrice(payData.payment.total_payment)}** (termasuk fee).\n\nOrder ID: \`${orderId}\`\n\nSetelah pembayaran berhasil, silakan isi form akun di bawah ini.`)
                             .setColor('#FF0000')
+                            .setImage('attachment://qris.png')
                             .addFields(
                                 { name: '💰 Total', value: formatPrice(payData.payment.total_payment), inline: true },
                                 { name: '⏰ Expired', value: `<t:${Math.floor(new Date(payData.payment.expired_at).getTime() / 1000)}:R>`, inline: true },
@@ -531,7 +536,7 @@ module.exports = {
                                     .setEmoji('✖️'),
                             );
 
-                        await channel.send({ content: `${user}`, embeds: [payEmbed], components: [payRow] });
+                        await channel.send({ content: `${user}`, embeds: [payEmbed], components: [payRow], files: [qrAttachment] });
                     } else {
                         await channel.send({ content: '❌ Gagal membuat pembayaran. Silakan hubungi admin.' });
                     }
