@@ -1,4 +1,5 @@
-const { PermissionFlagsBits } = require('discord.js');
+const { PermissionFlagsBits, AttachmentBuilder } = require('discord.js');
+const path = require('path');
 
 const VERIFY_CHANNEL = '1546462500273262663';
 
@@ -15,12 +16,21 @@ module.exports = {
             return message.reply('Channel verifikasi tidak ditemukan!');
         }
 
+        const logoPath = path.join(__dirname, '..', 'logo.png');
+        const logoAttachment = new AttachmentBuilder(logoPath, { name: 'logo.png' });
+
         const container = {
             flags: 32768,
             components: [
                 {
                     type: 17,
                     components: [
+                        {
+                            type: 13,
+                            media: {
+                                url: 'attachment://logo.png'
+                            }
+                        },
                         {
                             type: 10,
                             content: '## Verify yourself'
@@ -55,7 +65,7 @@ module.exports = {
             ]
         };
 
-        await channel.send(container);
+        await channel.send({ ...container, files: [logoAttachment] });
         await message.reply(`Panel verifikasi berhasil dikirim ke <#${VERIFY_CHANNEL}>!`);
     },
 };

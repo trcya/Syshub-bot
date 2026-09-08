@@ -74,7 +74,10 @@ module.exports = {
                 pendingVerifications.set(user.id, { code, expiresAt: Date.now() + 5 * 60 * 1000 });
 
                 const buffer = generateCaptchaImage(code);
-                const attachment = new AttachmentBuilder(buffer, { name: 'captcha.png' });
+                const captchaAttachment = new AttachmentBuilder(buffer, { name: 'captcha.png' });
+
+                const logoPath = path.join(__dirname, '..', 'logo.png');
+                const logoAttachment = new AttachmentBuilder(logoPath, { name: 'logo.png' });
 
                 const container = {
                     flags: 32768,
@@ -82,6 +85,12 @@ module.exports = {
                         {
                             type: 17,
                             components: [
+                                {
+                                    type: 13,
+                                    media: {
+                                        url: 'attachment://logo.png'
+                                    }
+                                },
                                 {
                                     type: 10,
                                     content: '## Solve the captcha'
@@ -127,7 +136,7 @@ module.exports = {
                     ]
                 };
 
-                return interaction.reply({ ...container, files: [attachment], ephemeral: true });
+                return interaction.reply({ ...container, files: [logoAttachment, captchaAttachment], ephemeral: true });
             }
 
             if (customId === 'verify_enter') {
