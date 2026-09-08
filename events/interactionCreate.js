@@ -79,82 +79,24 @@ module.exports = {
                 const logoPath = path.join(__dirname, '..', 'logo.png');
                 const logoAttachment = new AttachmentBuilder(logoPath, { name: 'logo.png' });
 
-                return interaction.reply({ content: 'Verifikasi sedang diproses...', ephemeral: true }).then(async () => {
-                    const payload = {
-                        flags: 32768,
-                        components: [
-                            {
-                                type: 17,
-                                components: [
-                                    {
-                                        type: 13,
-                                        media: {
-                                            url: 'attachment://logo.png'
-                                        }
-                                    },
-                                    {
-                                        type: 10,
-                                        content: '## Solve the captcha'
-                                    },
-                                    {
-                                        type: 14,
-                                        divider: true,
-                                        spacing: 1
-                                    },
-                                    {
-                                        type: 10,
-                                        content: 'Enter the 4 digits shown below. You have 5 minutes.'
-                                    },
-                                    {
-                                        type: 14,
-                                        divider: true,
-                                        spacing: 1
-                                    },
-                                    {
-                                        type: 13,
-                                        media: {
-                                            url: 'attachment://captcha.png'
-                                        }
-                                    },
-                                    {
-                                        type: 14,
-                                        divider: true,
-                                        spacing: 1
-                                    },
-                                    {
-                                        type: 1,
-                                        components: [
-                                            {
-                                                type: 2,
-                                                custom_id: 'verify_enter',
-                                                label: 'Enter code',
-                                                style: 1
-                                            }
-                                        ]
-                                    }
-                                ]
-                            }
-                        ]
-                    };
+                const embed = new EmbedBuilder()
+                    .setTitle('Solve the captcha')
+                    .setDescription('Enter the 4 digits shown below. You have 5 minutes.')
+                    .setColor('#00bfff')
+                    .setImage('attachment://captcha.png')
+                    .setThumbnail('attachment://logo.png')
+                    .setFooter({ text: 'SysHub Verification' })
+                    .setTimestamp();
 
-                    const formData = new FormData();
-                    formData.append('payload_json', JSON.stringify(payload));
-                    formData.append('files[0]', logoAttachment.attachment, 'logo.png');
-                    formData.append('files[1]', captchaAttachment.attachment, 'captcha.png');
+                const row = new ActionRowBuilder()
+                    .addComponents(
+                        new ButtonBuilder()
+                            .setCustomId('verify_enter')
+                            .setLabel('Enter code')
+                            .setStyle(ButtonStyle.Primary)
+                    );
 
-                    const res = await fetch(`https://discord.com/api/v10/interactions/${interaction.id}/${interaction.token}/messages/@original`, {
-                        method: 'PATCH',
-                        headers: {
-                            'Authorization': `Bot ${interaction.client.token}`,
-                        },
-                        body: formData
-                    });
-
-                    if (!res.ok) {
-                        const err = await res.json();
-                        console.error('[VERIFY] Failed to send captcha:', err);
-                    }
-                });
+                return interaction.reply({ embeds: [embed], components: [row], files: [logoAttachment, captchaAttachment], ephemeral: true });
             }
 
             if (customId === 'verify_enter') {
