@@ -1,4 +1,5 @@
-const { Events } = require('discord.js');
+const { Events, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, AttachmentBuilder } = require('discord.js');
+const path = require('path');
 
 function getStickyTextId() {
     return `# 📌 Informasi Penting
@@ -28,8 +29,27 @@ Welcome to **SysHub**! Please access the channels below:
 > Buy premium at <#1494149019864137780> or visit [syshub.site](https://syshub.site)`;
 }
 
-function getStickyTextVerify() {
-    return `# 🛑 Gabisa Verify? Chat Disini`;
+function getStickyVerifyEmbed() {
+    const logoPath = path.join(__dirname, '..', 'logo.png');
+    const logoAttachment = new AttachmentBuilder(logoPath, { name: 'logo.png' });
+
+    const embed = new EmbedBuilder()
+        .setTitle('Verify yourself')
+        .setDescription('Click the button below and solve the short captcha to unlock the server.')
+        .setColor('#00bfff')
+        .setThumbnail('attachment://logo.png')
+        .setFooter({ text: 'SysHub Verification' })
+        .setTimestamp();
+
+    const row = new ActionRowBuilder()
+        .addComponents(
+            new ButtonBuilder()
+                .setCustomId('verify_start')
+                .setLabel('Verify')
+                .setStyle(ButtonStyle.Success)
+        );
+
+    return { embeds: [embed], components: [row], files: [logoAttachment] };
 }
 
 const STICKY_CHANNELS = {
@@ -82,11 +102,16 @@ module.exports = {
                 }
             }
 
-            let content;
-            if (sticky.lang === 'en') content = getStickyTextEn();
-            else if (sticky.lang === 'verify') content = getStickyTextVerify();
-            else content = getStickyTextId();
-            const newMsg = await message.channel.send({ content });
+            let payload;
+            if (sticky.lang === 'verify') {
+                payload = getStickyVerifyEmbed();
+            } else if (sticky.lang === 'en') {
+                payload = { content: getStickyTextEn() };
+            } else {
+                payload = { content: getStickyTextId() };
+            }
+
+            const newMsg = await message.channel.send(payload);
             lastStickyMessage.set(message.channel.id, newMsg.id);
         } catch (error) {
             console.error(`[StickyNote] Error in channel ${message.channel.id}:`, error.message);
