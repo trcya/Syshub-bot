@@ -19,7 +19,7 @@ module.exports = {
         const logoPath = path.join(__dirname, '..', 'logo.png');
         const logoAttachment = new AttachmentBuilder(logoPath, { name: 'logo.png' });
 
-        const container = {
+        const payload = {
             flags: 32768,
             components: [
                 {
@@ -65,7 +65,24 @@ module.exports = {
             ]
         };
 
-        await channel.send({ ...container, files: [logoAttachment] });
+        const formData = new FormData();
+        formData.append('payload_json', JSON.stringify(payload));
+        formData.append('files[0]', logoAttachment.attachment, 'logo.png');
+
+        const res = await fetch(`https://discord.com/api/v10/channels/${VERIFY_CHANNEL}/messages`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bot ${message.client.token}`,
+            },
+            body: formData
+        });
+
+        if (!res.ok) {
+            const err = await res.json();
+            console.error('[VERIFY] Failed to send panel:', err);
+            return message.reply('Gagal mengirim panel verifikasi. Silakan coba lagi.');
+        }
+
         await message.reply(`Panel verifikasi berhasil dikirim ke <#${VERIFY_CHANNEL}>!`);
     },
 };
