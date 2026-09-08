@@ -11,6 +11,7 @@ const VERIFY_ROLE = '1494143210157510666';
 
 const jokiTimeouts = new Map();
 const pendingVerifications = new Map();
+const jokiPayments = new Map();
 
 async function generateTranscript(channel) {
     let messages = [];
@@ -508,6 +509,8 @@ module.exports = {
                     const payData = await payRes.json();
 
                     if (payData.payment) {
+                        jokiPayments.set(channel.id, { orderId, amount: payData.payment.amount });
+
                         const qrBuffer = await QRCode.toBuffer(payData.payment.payment_number, { width: 400, margin: 2 });
                         const qrAttachment = new AttachmentBuilder(qrBuffer, { name: 'qris.png' });
 
@@ -546,30 +549,21 @@ module.exports = {
             if (customId.startsWith('joki_paid_')) {
                 await interaction.deferReply({ ephemeral: true });
 
-                let orderId = null;
-                let payAmount = null;
-                const messages = await channel.messages.fetch({ limit: 50 });
-                for (const [, msg] of messages) {
-                    if (msg.embeds.length > 0 && msg.embeds[0].title === '💳 Pembayaran via Pakasir') {
-                        const desc = msg.embeds[0].description || '';
-                        const match = desc.match(/Order ID: `([^`]+)`/);
-                        if (match) orderId = match[1];
-                        const totalField = msg.embeds[0].fields?.find(f => f.name === '💰 Total');
-                        if (totalField) payAmount = parseInt(totalField.value.replace(/[^0-9]/g, ''));
-                        break;
-                    }
-                }
-
-                if (!orderId) {
+                const payData = jokiPayments.get(channel.id);
+                if (!payData) {
                     return interaction.editReply({ content: '❌ Tidak ditemukan data pembayaran. Hubungi admin.' });
                 }
 
                 try {
-                    const detailRes = await fetch(`https://app.pakasir.com/api/transactiondetail?project=${process.env.PAKASIR_PROJECT}&order_id=${orderId}&api_key=${process.env.PAKASIR_API_KEY}${payAmount ? '&amount=' + payAmount : ''}`);
+                    const detailRes = await fetch(`https://app.pakasir.com/api/transactiondetail?project=${process.env.PAKASIR_PROJECT}&order_id=${payData.orderId}&amount=${payData.amount}&api_key=${process.env.PAKASIR_API_KEY}`);
                     const detailData = await detailRes.json();
+                    console.log('[PAKASIR] Detail response:', JSON.stringify(detailData));
 
                     if (detailData.transaction && detailData.transaction.status === 'completed') {
+                        jokiPayments.delete(channel.id);
+
                         // Update QR embed to success
+                        const messages = await channel.messages.fetch({ limit: 50 });
                         for (const [, msg] of messages) {
                             if (msg.embeds.length > 0 && msg.embeds[0].title === '💳 Pembayaran via Pakasir') {
                                 const successEmbed = new EmbedBuilder()
