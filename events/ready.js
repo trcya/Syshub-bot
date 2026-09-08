@@ -546,24 +546,27 @@ module.exports = {
                     console.error(`[MONITOR] Error checking ${item.handle}:`, err.message);
                 }
 
-                if (status.error) continue;
+                if (status.error) {
+                    console.log(`[MONITOR] ${item.handle} (${item.platform} - ${item.contentType}): check returned error, skipping`);
+                    continue;
+                }
 
                 if (!status.isLive || !status.videoId) {
                     if (item.lastStreamId) {
                         db[i].offlineCount = (item.offlineCount || 0) + 1;
+                        console.log(`[MONITOR] ${item.handle}: offline (offlineCount=${db[i].offlineCount})`);
                     }
                     continue;
                 }
 
-                if (item.lastStreamId === status.videoId) continue;
-
-                // First run: set lastStreamId without notification
-                if (!item.lastStreamId) {
-                    console.log(`[MONITOR] First run: ${item.handle} -> lastStreamId=${status.videoId}`);
-                    db[i].lastStreamId = status.videoId;
-                    db[i].offlineCount = 0;
-                    updated = true;
+                if (item.lastStreamId === status.videoId) {
+                    console.log(`[MONITOR] ${item.handle}: same videoId=${status.videoId}, skip`);
                     continue;
+                }
+
+                // First run: record lastStreamId, still send notification if live
+                if (!item.lastStreamId) {
+                    console.log(`[MONITOR] First run: ${item.handle} -> lastStreamId=${status.videoId} (sending notif anyway)`);
                 }
 
                 // Send notification
