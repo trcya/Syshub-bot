@@ -312,7 +312,7 @@ module.exports = {
                     const preEmbed = new EmbedBuilder()
                         .setTitle(`${serviceEmoji} Joki ${serviceType}`)
                         .setColor('#5865F2')
-                        .setDescription(`Welcome ${user}!\nStaff akan segera membantu kamu.\n\nPilih durasi yang kamu inginkan:\n\n⚠️ **Jika tidak memilih durasi dalam 10 jam, kamu akan di-timeout selama 2 jam!**`)
+                        .setDescription(`Welcome ${user}!\nStaff akan segera membantu kamu.\n\nPilih durasi yang kamu inginkan:\n\n⚠️ **Jika tidak memilih durasi dalam 6 jam, kamu akan di-timeout selama 3 hari dan ticket akan ditutup!**`)
                         .setFooter({ text: 'SysHub Joki Service' })
                         .setTimestamp();
 
@@ -377,15 +377,17 @@ module.exports = {
                     await interaction.editReply({ content: `Ticket created: ${ticketChannel}` });
 
                     const timeoutKey = ticketChannel.id;
-                    const timeoutMs = 10 * 60 * 60 * 1000;
-                    const timeoutDuration = 2 * 60 * 60 * 1000;
+                    const timeoutMs = 6 * 60 * 60 * 1000;
+                    const timeoutDuration = 3 * 24 * 60 * 60 * 1000;
 
                     const timeoutId = setTimeout(async () => {
                         jokiTimeouts.delete(timeoutKey);
                         try {
                             const memberToTimeout = await guild.members.fetch(user.id);
-                            await memberToTimeout.timeout(timeoutDuration, 'Tidak memilih durasi joki dalam 10 jam');
-                            await ticketChannel.send(`⚠️ ${user} telah di-timeout selama 2 jam karena tidak memilih durasi dalam 10 jam.`);
+                            await memberToTimeout.timeout(timeoutDuration, 'Tidak memilih durasi joki dalam 6 jam');
+                            await ticketChannel.send(`⚠️ ${user} telah di-timeout selama 3 hari karena tidak memilih durasi dalam 6 jam.`);
+                            await ticketChannel.send(`🔒 Ticket akan ditutup dalam 5 detik...`);
+                            setTimeout(() => ticketChannel.delete(), 5000);
                         } catch (err) {
                             console.error('Failed to timeout user:', err);
                         }
@@ -488,19 +490,114 @@ module.exports = {
 
                 await channel.send(`${user} memilih **${serviceType}** durasi **${opt.label}** — **${formatPrice(opt.price)}**`);
 
-                const qrisPath = path.join(__dirname, '..', 'image.png');
-                const qrisAttachment = new AttachmentBuilder(qrisPath, { name: 'qris.png' });
-                const qrisEmbed = new EmbedBuilder()
-                    .setTitle('💳 Pembayaran QRIS')
-                    .setDescription(`Scan QRIS di bawah untuk melakukan pembayaran sebesar **${formatPrice(opt.price)}**.`)
-                    .setColor('#FF0000')
-                    .setImage('attachment://qris.png')
-                    .setFooter({ text: 'SysHub Joki Service' })
-                    .setTimestamp();
-                await channel.send({ embeds: [qrisEmbed], files: [qrisAttachment] });
+                // Create Pakasir payment transaction
+                const orderId = `JOKI-${channel.id}-${Date.now()}`;
+                try {
+                    const payRes = await fetch(`https://app.pakasir.com/api/transactioncreate/qris`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            project: process.env.PAKASIR_PROJECT,
+                            order_id: orderId,
+                            amount: opt.price,
+                            api_key: process.env.PAKASIR_API_KEY,
+                        }),
+                    });
+                    const payData = await payRes.json();
+
+                    if (payData.payment) {
+                        const payEmbed = new EmbedBuilder()
+                            .setTitle('💳 Pembayaran via Pakasir')
+                            .setDescription(`Silakan bayar sebesar **${formatPrice(payData.payment.total_payment)}** (termasuk fee).\n\nOrder ID: \`${orderId}\`\n\nLink pembayaran: [Klik disini](https://app.pakasir.com/pay/${process.env.PAKASIR_PROJECT}/${opt.price}?order_id=${orderId})\n\nSetelah pembayaran berhasil, silakan isi form akun di bawah ini.`)
+                            .setColor('#FF0000')
+                            .addFields(
+                                { name: '💰 Total', value: formatPrice(payData.payment.total_payment), inline: true },
+                                { name: '⏰ Expired', value: `<t:${Math.floor(new Date(payData.payment.expired_at).getTime() / 1000)}:R>`, inline: true },
+                            )
+                            .setFooter({ text: 'SysHub Joki Service' })
+                            .setTimestamp();
+
+                        const payRow = new ActionRowBuilder()
+                            .addComponents(
+                                new ButtonBuilder()
+                                    .setCustomId(`joki_account_form_${channel.id}`)
+                                    .setLabel('Isi Data Akun')
+                                    .setStyle(ButtonStyle.Success)
+                                    .setEmoji('📝'),
+                                new ButtonBuilder()
+                                    .setCustomId('close_joki_ticket')
+                                    .setLabel('Close Ticket')
+                                    .setStyle(ButtonStyle.Danger)
+                                    .setEmoji('✖️'),
+                            );
+
+                        await channel.send({ content: `${user}`, embeds: [payEmbed], components: [payRow] });
+                    } else {
+                        await channel.send({ content: '❌ Gagal membuat pembayaran. Silakan hubungi admin.' });
+                    }
+                } catch (err) {
+                    console.error('[PAKASIR] Payment error:', err);
+                    await channel.send({ content: '❌ Error saat membuat pembayaran. Silakan hubungi admin.' });
+                }
             }
 
-            // 7. CLOSE JOKI TICKET - Transcript + Delete
+            // 7. JOKI ACCOUNT FORM BUTTON - Show modal
+            if (customId.startsWith('joki_account_form_')) {
+                const modal = new ModalBuilder()
+                    .setCustomId('joki_account_modal')
+                    .setTitle('Form Data Akun Joki');
+
+                const usernameInput = new TextInputBuilder()
+                    .setCustomId('joki_username')
+                    .setLabel('Username')
+                    .setStyle(TextInputStyle.Short)
+                    .setRequired(true);
+
+                const passwordInput = new TextInputBuilder()
+                    .setCustomId('joki_password')
+                    .setLabel('Password')
+                    .setStyle(TextInputStyle.Short)
+                    .setRequired(true);
+
+                const verifInput = new TextInputBuilder()
+                    .setCustomId('joki_verif')
+                    .setLabel('Verif 2 Langkah (Aktif/Tidak)')
+                    .setStyle(TextInputStyle.Short)
+                    .setPlaceholder('Aktif atau Tidak')
+                    .setRequired(true);
+
+                const jenisInput = new TextInputBuilder()
+                    .setCustomId('joki_jenis')
+                    .setLabel('Jenis')
+                    .setStyle(TextInputStyle.Short)
+                    .setPlaceholder('Contoh: Growtopia')
+                    .setRequired(true);
+
+                const waktuInput = new TextInputBuilder()
+                    .setCustomId('joki_waktu')
+                    .setLabel('Jumlah Waktu')
+                    .setStyle(TextInputStyle.Short)
+                    .setRequired(true);
+
+                const noteInput = new TextInputBuilder()
+                    .setCustomId('joki_note')
+                    .setLabel('Note Untuk Admin')
+                    .setStyle(TextInputStyle.Paragraph)
+                    .setRequired(false);
+
+                modal.addComponents(
+                    new ActionRowBuilder().addComponents(usernameInput),
+                    new ActionRowBuilder().addComponents(passwordInput),
+                    new ActionRowBuilder().addComponents(verifInput),
+                    new ActionRowBuilder().addComponents(jenisInput),
+                    new ActionRowBuilder().addComponents(waktuInput),
+                    new ActionRowBuilder().addComponents(noteInput),
+                );
+
+                return interaction.showModal(modal);
+            }
+
+            // 8. CLOSE JOKI TICKET - Transcript + Delete
             if (customId === 'close_joki_ticket') {
                 if (!member.roles.cache.has(staffId) && user.id !== staffId) {
                     return interaction.reply({ content: 'Only staff can close tickets!', ephemeral: true });
@@ -752,6 +849,33 @@ module.exports = {
                 } catch (err) {
                     return interaction.reply({ content: 'Gagal menambahkan user. Pastikan ID benar dan user ada di server.', ephemeral: true });
                 }
+            }
+
+            // JOKI ACCOUNT FORM SUBMIT
+            if (customId === 'joki_account_modal') {
+                const username = interaction.fields.getTextInputValue('joki_username');
+                const password = interaction.fields.getTextInputValue('joki_password');
+                const verif = interaction.fields.getTextInputValue('joki_verif');
+                const jenis = interaction.fields.getTextInputValue('joki_jenis');
+                const waktu = interaction.fields.getTextInputValue('joki_waktu');
+                const note = interaction.fields.getTextInputValue('joki_note') || '-';
+
+                const accountEmbed = new EmbedBuilder()
+                    .setTitle('📝 Data Akun Joki')
+                    .setColor('#5865F2')
+                    .addFields(
+                        { name: '👤 Username', value: username, inline: true },
+                        { name: '🔑 Password', value: '||' + password + '||', inline: true },
+                        { name: '🔒 Verif 2 Langkah', value: verif, inline: true },
+                        { name: '📋 Jenis', value: jenis, inline: true },
+                        { name: '⏱️ Jumlah Waktu', value: waktu, inline: true },
+                        { name: '💬 Note Untuk Admin', value: note, inline: false },
+                    )
+                    .setFooter({ text: 'SysHub Joki Service' })
+                    .setTimestamp();
+
+                await interaction.reply({ embeds: [accountEmbed], ephemeral: true });
+                await channel.send({ content: `${user} telah mengisi data akun.`, embeds: [accountEmbed] });
             }
 
             // VERIFY MODAL SUBMIT
