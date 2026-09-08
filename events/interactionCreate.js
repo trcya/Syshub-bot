@@ -1,12 +1,15 @@
 const { Events, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, PermissionFlagsBits, ChannelType, ModalBuilder, TextInputBuilder, TextInputStyle, AttachmentBuilder } = require('discord.js');
 const { getEmbed, getButtons } = require('../utils/welcomeEmbed');
+const { generateCaptcha, generateCaptchaImage } = require('../utils/captcha');
 const path = require('path');
 
 const JOKI_TICKET_LOG_CHANNEL = '1545265772731957388';
 const JOKI_CATEGORY_ID = '1545263915158478898';
 const JOKI_ROLE_ID = '1498652236257951764';
+const VERIFY_ROLE = '1494143210157510666';
 
 const jokiTimeouts = new Map();
+const pendingVerifications = new Map();
 
 async function generateTranscript(channel) {
     let messages = [];
@@ -59,6 +62,67 @@ module.exports = {
                     embeds: [getEmbed(lang)],
                     components: [getButtons(lang)]
                 });
+            }
+
+            // VERIFY SYSTEM
+            if (customId === 'verify_start') {
+                if (member.roles.cache.has(VERIFY_ROLE)) {
+                    return interaction.reply({ content: 'Kamu sudah terverifikasi!', ephemeral: true });
+                }
+
+                const code = generateCaptcha(5);
+                pendingVerifications.set(user.id, { code, expiresAt: Date.now() + 5 * 60 * 1000 });
+
+                const buffer = generateCaptchaImage(code);
+                const attachment = new AttachmentBuilder(buffer, { name: 'captcha.png' });
+
+                const embed = new EmbedBuilder()
+                    .setTitle('🔐 Solve the Captcha')
+                    .setDescription('Enter the 5 characters shown below. You have 5 minutes.')
+                    .setColor('#2F3136')
+                    .setImage('attachment://captcha.png')
+                    .setFooter({ text: 'SysHub Verification' })
+                    .setTimestamp();
+
+                const row = new ActionRowBuilder()
+                    .addComponents(
+                        new ButtonBuilder()
+                            .setCustomId('verify_enter')
+                            .setLabel('Enter Code')
+                            .setStyle(ButtonStyle.Primary)
+                            .setEmoji('✏️')
+                    );
+
+                return interaction.reply({ embeds: [embed], components: [row], files: [attachment], ephemeral: true });
+            }
+
+            if (customId === 'verify_enter') {
+                const pending = pendingVerifications.get(user.id);
+                if (!pending) {
+                    return interaction.reply({ content: 'Klik tombol **Verify** lagi untuk mendapatkan captcha baru.', ephemeral: true });
+                }
+                if (Date.now() > pending.expiresAt) {
+                    pendingVerifications.delete(user.id);
+                    return interaction.reply({ content: 'Captcha sudah expired! Klik tombol **Verify** lagi.', ephemeral: true });
+                }
+
+                const modal = new ModalBuilder()
+                    .setCustomId('verify_modal')
+                    .setTitle('Masukkan Kode Captcha');
+
+                const input = new TextInputBuilder()
+                    .setCustomId('verify_code_input')
+                    .setLabel('Masukkan 5 karakter dari captcha')
+                    .setStyle(TextInputStyle.Short)
+                    .setMinLength(5)
+                    .setMaxLength(5)
+                    .setPlaceholder('Contoh: aB3xZ')
+                    .setRequired(true);
+
+                const actionRow = new ActionRowBuilder().addComponents(input);
+                modal.addComponents(actionRow);
+
+                return interaction.showModal(modal);
             }
 
             const logChannel = guild.channels.cache.get(process.env.TICKET_LOG_CHANNEL_ID);
@@ -684,6 +748,35 @@ module.exports = {
                     await channel.send(`${memberToAdd} telah ditambahkan ke ticket oleh staff.`);
                 } catch (err) {
                     return interaction.reply({ content: 'Gagal menambahkan user. Pastikan ID benar dan user ada di server.', ephemeral: true });
+                }
+            }
+
+            // VERIFY MODAL SUBMIT
+            if (customId === 'verify_modal') {
+                const pending = pendingVerifications.get(user.id);
+                if (!pending) {
+                    return interaction.reply({ content: 'Tidak ada captcha aktif. Klik tombol **Verify** lagi.', ephemeral: true });
+                }
+
+                if (Date.now() > pending.expiresAt) {
+                    pendingVerifications.delete(user.id);
+                    return interaction.reply({ content: 'Captcha sudah expired! Klik tombol **Verify** lagi.', ephemeral: true });
+                }
+
+                const inputCode = interaction.fields.getTextInputValue('verify_code_input').trim();
+
+                if (inputCode !== pending.code) {
+                    return interaction.reply({ content: `❌ Kode salah! Kamu memasukkan: **${inputCode}**`, ephemeral: true });
+                }
+
+                pendingVerifications.delete(user.id);
+
+                try {
+                    await member.roles.add(VERIFY_ROLE);
+                    return interaction.reply({ content: '✅ Verifikasi berhasil! Kamu sekarang memiliki akses ke server.', ephemeral: true });
+                } catch (err) {
+                    console.error('[VERIFY] Failed to add role:', err.message);
+                    return interaction.reply({ content: 'Gagal memberikan role. Hubungi admin.', ephemeral: true });
                 }
             }
         }

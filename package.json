@@ -12,6 +12,7 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "canvas": "^3.2.3",
     "discord.js": "^14.26.4",
     "dotenv": "^17.4.2",
     "ms": "^2.1.3",
