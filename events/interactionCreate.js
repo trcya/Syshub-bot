@@ -516,7 +516,7 @@ module.exports = {
 
                         const payEmbed = new EmbedBuilder()
                             .setTitle('💳 Pembayaran via Pakasir')
-                            .setDescription(`Scan QR di bawah untuk melakukan pembayaran sebesar **${formatPrice(payData.payment.total_payment)}** (termasuk fee).\n\nOrder ID: \`${orderId}\`\n\nSetelah pembayaran berhasil, klik tombol **Sudah Bayar** di bawah ini.`)
+                            .setDescription(`Scan QR di bawah untuk melakukan pembayaran sebesar **${formatPrice(payData.payment.total_payment)}** (termasuk fee).\n\nOrder ID: \`${orderId}\`\n\nPembayaran akan dicek otomatis.`)
                             .setColor('#FF0000')
                             .setImage('attachment://qris.png')
                             .addFields(
@@ -526,16 +526,60 @@ module.exports = {
                             .setFooter({ text: 'SysHub Joki Service' })
                             .setTimestamp();
 
-                        const payRow = new ActionRowBuilder()
-                            .addComponents(
-                                new ButtonBuilder()
-                                    .setCustomId(`joki_paid_${channel.id}`)
-                                    .setLabel('Sudah Bayar')
-                                    .setStyle(ButtonStyle.Success)
-                                    .setEmoji('✅'),
-                            );
+                        await channel.send({ content: `${user}`, embeds: [payEmbed], files: [qrAttachment] });
 
-                        await channel.send({ content: `${user}`, embeds: [payEmbed], components: [payRow], files: [qrAttachment] });
+                        // Auto-check payment status every 10 seconds
+                        const checkInterval = setInterval(async () => {
+                            try {
+                                const detailRes = await fetch(`https://app.pakasir.com/api/transactiondetail?project=${process.env.PAKASIR_PROJECT}&order_id=${orderId}&amount=${payData.payment.amount}&api_key=${process.env.PAKASIR_API_KEY}`);
+                                const detailData = await detailRes.json();
+
+                                if (detailData.transaction && detailData.transaction.status === 'completed') {
+                                    clearInterval(checkInterval);
+                                    jokiPayments.delete(channel.id);
+
+                                    // Update QR embed to success
+                                    const messages = await channel.messages.fetch({ limit: 50 });
+                                    for (const [, msg] of messages) {
+                                        if (msg.embeds.length > 0 && msg.embeds[0].title === '💳 Pembayaran via Pakasir') {
+                                            const successEmbed = new EmbedBuilder()
+                                                .setTitle('✅ Pembayaran Berhasil')
+                                                .setDescription('Pembayaran telah dikonfirmasi! Mengirim form data akun...')
+                                                .setColor('#57F287')
+                                                .setFooter({ text: 'SysHub Joki Service' })
+                                                .setTimestamp();
+                                            await msg.edit({ embeds: [successEmbed], components: [] }).catch(() => {});
+                                            break;
+                                        }
+                                    }
+
+                                    // Send account form embed
+                                    const formEmbed = new EmbedBuilder()
+                                        .setTitle('📝 Form Data Akun Joki')
+                                        .setDescription('Silakan klik tombol **Isi Data Akun** di bawah ini untuk mengirim data akun kamu.')
+                                        .setColor('#00bfff')
+                                        .setFooter({ text: 'SysHub Joki Service' })
+                                        .setTimestamp();
+
+                                    const formRow = new ActionRowBuilder()
+                                        .addComponents(
+                                            new ButtonBuilder()
+                                                .setCustomId('joki_account_form')
+                                                .setLabel('Isi Data Akun')
+                                                .setStyle(ButtonStyle.Primary)
+                                                .setEmoji('📝'),
+                                        );
+
+                                    await channel.send({ content: `${user}`, embeds: [formEmbed], components: [formRow] });
+                                }
+                            } catch (err) {
+                                console.error('[PAKASIR] Auto-check error:', err.message);
+                            }
+                        }, 10000);
+
+                        // Stop checking after expired
+                        setTimeout(() => clearInterval(checkInterval), 30 * 60 * 1000);
+
                     } else {
                         await channel.send({ content: '❌ Gagal membuat pembayaran. Silakan hubungi admin.' });
                     }
@@ -545,65 +589,60 @@ module.exports = {
                 }
             }
 
-            // 7. JOKI PAID BUTTON - Check payment & show form
-            if (customId.startsWith('joki_paid_')) {
-                await interaction.deferReply({ ephemeral: true });
+            // JOKI ACCOUNT FORM BUTTON - Show modal
+            if (customId === 'joki_account_form') {
+                const modal = new ModalBuilder()
+                    .setCustomId('joki_account_modal')
+                    .setTitle('Form Data Akun Joki');
 
-                const payData = jokiPayments.get(channel.id);
-                if (!payData) {
-                    return interaction.editReply({ content: '❌ Tidak ditemukan data pembayaran. Hubungi admin.' });
-                }
+                const usernameInput = new TextInputBuilder()
+                    .setCustomId('joki_username')
+                    .setLabel('Username')
+                    .setStyle(TextInputStyle.Short)
+                    .setRequired(true);
 
-                try {
-                    const detailRes = await fetch(`https://app.pakasir.com/api/transactiondetail?project=${process.env.PAKASIR_PROJECT}&order_id=${payData.orderId}&amount=${payData.amount}&api_key=${process.env.PAKASIR_API_KEY}`);
-                    const detailData = await detailRes.json();
-                    console.log('[PAKASIR] Detail response:', JSON.stringify(detailData));
+                const passwordInput = new TextInputBuilder()
+                    .setCustomId('joki_password')
+                    .setLabel('Password')
+                    .setStyle(TextInputStyle.Short)
+                    .setRequired(true);
 
-                    if (detailData.transaction && detailData.transaction.status === 'completed') {
-                        jokiPayments.delete(channel.id);
+                const verifInput = new TextInputBuilder()
+                    .setCustomId('joki_verif')
+                    .setLabel('Verif 2 Langkah (Aktif/Tidak)')
+                    .setStyle(TextInputStyle.Short)
+                    .setPlaceholder('Aktif atau Tidak')
+                    .setRequired(true);
 
-                        // Update QR embed to success
-                        const messages = await channel.messages.fetch({ limit: 50 });
-                        for (const [, msg] of messages) {
-                            if (msg.embeds.length > 0 && msg.embeds[0].title === '💳 Pembayaran via Pakasir') {
-                                const successEmbed = new EmbedBuilder()
-                                    .setTitle('✅ Pembayaran Berhasil')
-                                    .setDescription('Pembayaran telah dikonfirmasi. Silakan isi data akun di bawah ini.')
-                                    .setColor('#57F287')
-                                    .setFooter({ text: 'SysHub Joki Service' })
-                                    .setTimestamp();
-                                await msg.edit({ embeds: [successEmbed], components: [], files: [] }).catch(() => {});
-                                break;
-                            }
-                        }
+                const jenisInput = new TextInputBuilder()
+                    .setCustomId('joki_jenis')
+                    .setLabel('Jenis')
+                    .setStyle(TextInputStyle.Short)
+                    .setPlaceholder('Contoh: Growtopia')
+                    .setRequired(true);
 
-                        await interaction.editReply({ content: '✅ Pembayaran berhasil! Mengirim form data akun...' });
+                const waktuInput = new TextInputBuilder()
+                    .setCustomId('joki_waktu')
+                    .setLabel('Jumlah Waktu')
+                    .setStyle(TextInputStyle.Short)
+                    .setRequired(true);
 
-                        // Send account form embed
-                        const formEmbed = new EmbedBuilder()
-                            .setTitle('📝 Form Data Akun Joki')
-                            .setDescription('Silakan klik tombol **Isi Data Akun** di bawah ini untuk mengirim data akun kamu.')
-                            .setColor('#00bfff')
-                            .setFooter({ text: 'SysHub Joki Service' })
-                            .setTimestamp();
+                const noteInput = new TextInputBuilder()
+                    .setCustomId('joki_note')
+                    .setLabel('Note Untuk Admin')
+                    .setStyle(TextInputStyle.Paragraph)
+                    .setRequired(false);
 
-                        const formRow = new ActionRowBuilder()
-                            .addComponents(
-                                new ButtonBuilder()
-                                    .setCustomId(`joki_account_form_${channel.id}`)
-                                    .setLabel('Isi Data Akun')
-                                    .setStyle(ButtonStyle.Primary)
-                                    .setEmoji('📝'),
-                            );
+                modal.addComponents(
+                    new ActionRowBuilder().addComponents(usernameInput),
+                    new ActionRowBuilder().addComponents(passwordInput),
+                    new ActionRowBuilder().addComponents(verifInput),
+                    new ActionRowBuilder().addComponents(jenisInput),
+                    new ActionRowBuilder().addComponents(waktuInput),
+                    new ActionRowBuilder().addComponents(noteInput),
+                );
 
-                        await channel.send({ embeds: [formEmbed], components: [formRow] });
-                    } else {
-                        return interaction.editReply({ content: '⏳ Pembayaran belum terdeteksi. Silakan tunggu beberapa saat lalu coba lagi.' });
-                    }
-                } catch (err) {
-                    console.error('[PAKASIR] Check payment error:', err);
-                    return interaction.editReply({ content: '❌ Error mengecek pembayaran. Silakan coba lagi.' });
-                }
+                return interaction.showModal(modal);
             }
 
             // 8. CLOSE JOKI TICKET - Transcript + Delete
