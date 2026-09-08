@@ -589,60 +589,25 @@ module.exports = {
                 }
             }
 
-            // JOKI ACCOUNT FORM BUTTON - Show modal
+            // JOKI ACCOUNT FORM BUTTON - Send template
             if (customId === 'joki_account_form') {
-                const modal = new ModalBuilder()
-                    .setCustomId('joki_account_modal')
-                    .setTitle('Form Data Akun Joki');
+                const templateEmbed = new EmbedBuilder()
+                    .setTitle('📝 Form Data Akun Joki')
+                    .setDescription('Silakan copy paste format di bawah ini, isi datanya, lalu kirim di channel ini:\n\n```\nUsername : \nPassword : \nVerif 2 Langkah : (Aktif/Tidak)\n\nJenis : \nJumlah Waktu : \nNote Untuk Admin : \n```')
+                    .setColor('#00bfff')
+                    .setFooter({ text: 'SysHub Joki Service' })
+                    .setTimestamp();
 
-                const usernameInput = new TextInputBuilder()
-                    .setCustomId('joki_username')
-                    .setLabel('Username')
-                    .setStyle(TextInputStyle.Short)
-                    .setRequired(true);
+                const prosesRow = new ActionRowBuilder()
+                    .addComponents(
+                        new ButtonBuilder()
+                            .setCustomId('joki_proses')
+                            .setLabel('Proses Joki')
+                            .setStyle(ButtonStyle.Success)
+                            .setEmoji('🚀'),
+                    );
 
-                const passwordInput = new TextInputBuilder()
-                    .setCustomId('joki_password')
-                    .setLabel('Password')
-                    .setStyle(TextInputStyle.Short)
-                    .setRequired(true);
-
-                const verifInput = new TextInputBuilder()
-                    .setCustomId('joki_verif')
-                    .setLabel('Verif 2 Langkah (Aktif/Tidak)')
-                    .setStyle(TextInputStyle.Short)
-                    .setPlaceholder('Aktif atau Tidak')
-                    .setRequired(true);
-
-                const jenisInput = new TextInputBuilder()
-                    .setCustomId('joki_jenis')
-                    .setLabel('Jenis')
-                    .setStyle(TextInputStyle.Short)
-                    .setPlaceholder('Contoh: Growtopia')
-                    .setRequired(true);
-
-                const waktuInput = new TextInputBuilder()
-                    .setCustomId('joki_waktu')
-                    .setLabel('Jumlah Waktu')
-                    .setStyle(TextInputStyle.Short)
-                    .setRequired(true);
-
-                const noteInput = new TextInputBuilder()
-                    .setCustomId('joki_note')
-                    .setLabel('Note Untuk Admin')
-                    .setStyle(TextInputStyle.Paragraph)
-                    .setRequired(false);
-
-                modal.addComponents(
-                    new ActionRowBuilder().addComponents(usernameInput),
-                    new ActionRowBuilder().addComponents(passwordInput),
-                    new ActionRowBuilder().addComponents(verifInput),
-                    new ActionRowBuilder().addComponents(jenisInput),
-                    new ActionRowBuilder().addComponents(waktuInput),
-                    new ActionRowBuilder().addComponents(noteInput),
-                );
-
-                return interaction.showModal(modal);
+                await interaction.reply({ embeds: [templateEmbed], components: [prosesRow] });
             }
 
             // 8. CLOSE JOKI TICKET - Transcript + Delete
@@ -923,48 +888,6 @@ module.exports = {
                 } catch (err) {
                     return interaction.reply({ content: 'Gagal menambahkan user. Pastikan ID benar dan user ada di server.', ephemeral: true });
                 }
-            }
-
-            // JOKI ACCOUNT FORM SUBMIT
-            if (customId === 'joki_account_modal') {
-                const username = interaction.fields.getTextInputValue('joki_username');
-                const password = interaction.fields.getTextInputValue('joki_password');
-                const verif = interaction.fields.getTextInputValue('joki_verif');
-                const jenis = interaction.fields.getTextInputValue('joki_jenis');
-                const waktu = interaction.fields.getTextInputValue('joki_waktu');
-                const note = interaction.fields.getTextInputValue('joki_note') || '-';
-
-                const accountEmbed = new EmbedBuilder()
-                    .setTitle('📝 Data Akun Joki')
-                    .setColor('#5865F2')
-                    .addFields(
-                        { name: '👤 Username', value: username, inline: true },
-                        { name: '🔑 Password', value: '||' + password + '||', inline: true },
-                        { name: '🔒 Verif 2 Langkah', value: verif, inline: true },
-                        { name: '📋 Jenis', value: jenis, inline: true },
-                        { name: '⏱️ Jumlah Waktu', value: waktu, inline: true },
-                        { name: '💬 Note Untuk Admin', value: note, inline: false },
-                    )
-                    .setFooter({ text: 'SysHub Joki Service' })
-                    .setTimestamp();
-
-                await interaction.reply({ content: '✅ Data akun berhasil dikirim!', ephemeral: true });
-
-                const prosesRow = new ActionRowBuilder()
-                    .addComponents(
-                        new ButtonBuilder()
-                            .setCustomId('joki_proses')
-                            .setLabel('Proses Joki')
-                            .setStyle(ButtonStyle.Success)
-                            .setEmoji('🚀'),
-                        new ButtonBuilder()
-                            .setCustomId('close_joki_ticket')
-                            .setLabel('Close Ticket')
-                            .setStyle(ButtonStyle.Danger)
-                            .setEmoji('✖️'),
-                    );
-
-                await channel.send({ content: `${user} telah mengisi data akun. <@&${JOKI_ROLE_ID}>`, embeds: [accountEmbed], components: [prosesRow] });
             }
 
             // VERIFY MODAL SUBMIT
