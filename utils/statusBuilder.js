@@ -46,7 +46,7 @@ function buildStatusBody() {
                     },
                     {
                         type: 10,
-                        content: `> [Velocity](https://realvelocity.xyz/): ${green}\n> [Madium](https://getmadium.net/): ${purple}\n> [Real](https://realest.gg): ${green} (Recomended)`
+                        content: `> [Velocity](https://realvelocity.xyz/): ${green}\n> [Madium](https://getmadium.net/): ${purple}\n> [Xeno](https://www.xeno.now/): ${red}\n> [Solara](https://getsolara.dev/): ${red}\n>  [Real](https://realest.gg): ${green} (Recomended)`
                     },
                     {
                         type: 14,
@@ -72,7 +72,7 @@ function buildStatusBody() {
                     },
                     {
                         type: 10,
-                        content: `> [Arceus X](https://spdmteam.com/index?os=android): ${yellow}\n> [Codex](https://codex.lol/android): ${yellow}\n> [Delta](https://deltaexploits.dev/delta-executor-android): ${green}\n> [Vega X](https://vegax.gg): ${yellow}`
+                        content: `> [Arceus X](https://spdmteam.com/index?os=android): ${red}\n> [Codex](https://codex.lol/android): ${yellow}\n> [Delta](https://deltaexploits.dev/delta-executor-android): ${green}\n> [Vega X](https://vegax.gg): ${yellow}`
                     },
                     {
                         type: 14,
