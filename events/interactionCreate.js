@@ -1,6 +1,7 @@
 const { Events, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, PermissionFlagsBits, ChannelType, ModalBuilder, TextInputBuilder, TextInputStyle, AttachmentBuilder } = require('discord.js');
 const { getEmbed, getButtons } = require('../utils/welcomeEmbed');
 const { generateCaptcha, generateCaptchaImage } = require('../utils/captcha');
+const { buildStockEmbed, buildAdminRow, loadStock, saveStock } = require('../commands/setup-premium-stock');
 const QRCode = require('qrcode');
 const path = require('path');
 
@@ -682,7 +683,59 @@ module.exports = {
                 await interaction.update({ embeds: [prosesEmbed], components: [closeRow] });
                 await channel.send(`🚀 Joki sedang diproses oleh ${user}. Mohon tunggu hingga selesai.`);
             }
-        }
+
+            // === PREMIUM STOCK HANDLERS ===
+            if (customId === 'premium_stock_add' || customId === 'premium_stock_delete') {
+                if (!member.roles.cache.has(process.env.MIDMAN_STAFF_ID) && user.id !== process.env.MIDMAN_STAFF_ID) {
+                    return interaction.reply({ content: '❌ Hanya admin yang bisa mengatur stock!', ephemeral: true });
+                }
+
+                const action = customId === 'premium_stock_add' ? 'Tambah' : 'Kurangi';
+                const modal = new ModalBuilder()
+                    .setCustomId(`premium_stock_${customId === 'premium_stock_add' ? 'add' : 'delete'}_modal`)
+                    .setTitle(`${action} Stock Premium`);
+
+                const amountInput = new TextInputBuilder()
+                    .setCustomId('stock_amount')
+                    .setLabel(`Jumlah ${action === 'Tambah' ? 'penambahan' : 'pengurangan'}`)
+                    .setStyle(TextInputStyle.Short)
+                    .setPlaceholder('Masukkan angka (contoh: 5)')
+                    .setRequired(true);
+
+                const row = new ActionRowBuilder().addComponents(amountInput);
+                modal.addComponents(row);
+                return interaction.showModal(modal);
+            }
+
+            if (customId === 'premium_stock_reset') {
+                if (!member.roles.cache.has(process.env.MIDMAN_STAFF_ID) && user.id !== process.env.MIDMAN_STAFF_ID) {
+                    return interaction.reply({ content: '❌ Hanya admin yang bisa mengatur stock!', ephemeral: true });
+                }
+
+                const stockData = loadStock();
+                stockData.currentStock = 0;
+                saveStock(stockData);
+
+                const embed = buildStockEmbed(stockData);
+                const adminRow = buildAdminRow();
+                await interaction.update({ embeds: [embed], components: [adminRow] });
+                return interaction.followUp({ content: '🔄 Stock telah direset ke **0**.', ephemeral: true });
+            }
+
+            if (customId === 'premium_stock_default') {
+                if (!member.roles.cache.has(process.env.MIDMAN_STAFF_ID) && user.id !== process.env.MIDMAN_STAFF_ID) {
+                    return interaction.reply({ content: '❌ Hanya admin yang bisa mengatur stock!', ephemeral: true });
+                }
+
+                const stockData = loadStock();
+                stockData.currentStock = stockData.defaultStock;
+                saveStock(stockData);
+
+                const embed = buildStockEmbed(stockData);
+                const adminRow = buildAdminRow();
+                await interaction.update({ embeds: [embed], components: [adminRow] });
+                return interaction.followUp({ content: `🏠 Stock dikembalikan ke default: **${stockData.defaultStock}** key.`, ephemeral: true });
+            }
 
         // --- HANDLE MODALS ---
         if (interaction.isModalSubmit()) {
@@ -888,6 +941,60 @@ module.exports = {
                 } catch (err) {
                     return interaction.reply({ content: 'Gagal menambahkan user. Pastikan ID benar dan user ada di server.', ephemeral: true });
                 }
+            }
+
+            // PREMIUM STOCK ADD MODAL
+            if (customId === 'premium_stock_add_modal') {
+                const amount = parseInt(interaction.fields.getTextInputValue('stock_amount'), 10);
+                if (isNaN(amount) || amount <= 0) {
+                    return interaction.reply({ content: '❌ Masukkan angka yang valid dan lebih dari 0!', ephemeral: true });
+                }
+
+                const stockData = loadStock();
+                stockData.currentStock += amount;
+                saveStock(stockData);
+
+                const embed = buildStockEmbed(stockData);
+                const adminRow = buildAdminRow();
+
+                try {
+                    const channel = interaction.client.channels.cache.get(stockData.channelId);
+                    if (channel && stockData.messageId) {
+                        const msg = await channel.messages.fetch(stockData.messageId);
+                        await msg.edit({ embeds: [embed], components: [adminRow] });
+                    }
+                } catch (e) {}
+
+                return interaction.reply({ content: `➕ Stock ditambah **${amount}** key. Total sekarang: **${stockData.currentStock}**`, ephemeral: true });
+            }
+
+            // PREMIUM STOCK DELETE MODAL
+            if (customId === 'premium_stock_delete_modal') {
+                const amount = parseInt(interaction.fields.getTextInputValue('stock_amount'), 10);
+                if (isNaN(amount) || amount <= 0) {
+                    return interaction.reply({ content: '❌ Masukkan angka yang valid dan lebih dari 0!', ephemeral: true });
+                }
+
+                const stockData = loadStock();
+                if (amount > stockData.currentStock) {
+                    return interaction.reply({ content: `❌ Stock tidak cukup! Stock saat ini: **${stockData.currentStock}**`, ephemeral: true });
+                }
+
+                stockData.currentStock -= amount;
+                saveStock(stockData);
+
+                const embed = buildStockEmbed(stockData);
+                const adminRow = buildAdminRow();
+
+                try {
+                    const channel = interaction.client.channels.cache.get(stockData.channelId);
+                    if (channel && stockData.messageId) {
+                        const msg = await channel.messages.fetch(stockData.messageId);
+                        await msg.edit({ embeds: [embed], components: [adminRow] });
+                    }
+                } catch (e) {}
+
+                return interaction.reply({ content: `➖ Stock dikurangi **${amount}** key. Total sekarang: **${stockData.currentStock}**`, ephemeral: true });
             }
 
             // VERIFY MODAL SUBMIT
