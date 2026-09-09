@@ -1,8 +1,9 @@
-const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, PermissionFlagsBits } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, PermissionFlagsBits, AttachmentBuilder } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
 
 const STOCK_FILE = path.join(__dirname, '..', 'premium-stock.json');
+const LOGO_PATH = path.join(__dirname, '..', 'logo.png');
 
 function loadStock() {
     try {
@@ -17,14 +18,14 @@ function saveStock(data) {
 }
 
 function buildStockEmbed(stockData) {
-    const { currentStock, defaultStock } = stockData;
+    const { currentStock } = stockData;
 
     return new EmbedBuilder()
         .setColor('#FFD700')
         .setTitle('🔐 Premium Key Lifetime Stock')
+        .setThumbnail('attachment://logo.png')
         .setDescription(
-            `**Current Stock:** \`${currentStock}\` keys\n` +
-            `**Default Stock:** \`${defaultStock}\` keys/month\n\n` +
+            `**Current Stock:** \`${currentStock}\` keys\n\n` +
             `Beli premium key di **syshub.site** atau buka ticket di server.`
         )
         .setFooter({ text: 'SysHub Premium System' })
@@ -80,8 +81,9 @@ module.exports = {
         const stockData = loadStock();
         const embed = buildStockEmbed(stockData);
         const adminRow = buildAdminRow();
+        const logoFile = new AttachmentBuilder(LOGO_PATH, { name: 'logo.png' });
 
-        const msg = await channel.send({ embeds: [embed], components: [adminRow] });
+        const msg = await channel.send({ embeds: [embed], components: [adminRow], files: [logoFile] });
 
         stockData.channelId = channel.id;
         stockData.messageId = msg.id;

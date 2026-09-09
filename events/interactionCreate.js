@@ -5,6 +5,8 @@ const { buildStockEmbed, buildAdminRow, loadStock, saveStock } = require('../com
 const QRCode = require('qrcode');
 const path = require('path');
 
+const LOGO_PATH = path.join(__dirname, '..', 'logo.png');
+
 const JOKI_TICKET_LOG_CHANNEL = '1545265772731957388';
 const JOKI_CATEGORY_ID = '1545263915158478898';
 const JOKI_ROLE_ID = '1498652236257951764';
@@ -957,13 +959,14 @@ module.exports = {
 
                 const embed = buildStockEmbed(stockData);
                 const adminRow = buildAdminRow();
+                const logoFile = new AttachmentBuilder(LOGO_PATH, { name: 'logo.png' });
 
                 try {
                     if (stockData.channelId && stockData.messageId) {
                         const ch = await interaction.client.channels.fetch(stockData.channelId);
                         if (ch) {
                             const msg = await ch.messages.fetch(stockData.messageId);
-                            await msg.edit({ embeds: [embed], components: [adminRow] });
+                            await msg.edit({ embeds: [embed], components: [adminRow], files: [logoFile] });
                         }
                     }
                 } catch (e) {}
@@ -988,13 +991,14 @@ module.exports = {
 
                 const embed = buildStockEmbed(stockData);
                 const adminRow = buildAdminRow();
+                const logoFile = new AttachmentBuilder(LOGO_PATH, { name: 'logo.png' });
 
                 try {
                     if (stockData.channelId && stockData.messageId) {
                         const ch = await interaction.client.channels.fetch(stockData.channelId);
                         if (ch) {
                             const msg = await ch.messages.fetch(stockData.messageId);
-                            await msg.edit({ embeds: [embed], components: [adminRow] });
+                            await msg.edit({ embeds: [embed], components: [adminRow], files: [logoFile] });
                         }
                     }
                 } catch (e) {}
