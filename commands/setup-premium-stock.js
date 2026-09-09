@@ -70,10 +70,18 @@ module.exports = {
         .setDescription('Deploy the Premium Key Stock Panel')
         .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
     async execute(interaction) {
-        const channel = interaction.options.getChannel('channel') || interaction.client.channels.cache.get('1494149019864137780');
+        await interaction.deferReply({ ephemeral: true });
+
+        const targetChannelId = '1494149019864137780';
+        let channel;
+        try {
+            channel = await interaction.client.channels.fetch(targetChannelId);
+        } catch {
+            channel = null;
+        }
 
         if (!channel) {
-            return interaction.reply({ content: 'Channel premium stock tidak ditemukan!', ephemeral: true });
+            return interaction.editReply({ content: 'Channel premium stock tidak ditemukan!' });
         }
 
         const stockData = loadStock();
@@ -87,7 +95,7 @@ module.exports = {
         stockData.messageId = msg.id;
         saveStock(stockData);
 
-        await interaction.reply({ content: `Premium Stock Panel deployed to ${channel}!`, ephemeral: true });
+        await interaction.editReply({ content: `Premium Stock Panel deployed to ${channel}!` });
     },
     buildStockEmbed,
     buildAdminRow,

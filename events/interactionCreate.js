@@ -736,6 +736,7 @@ module.exports = {
                 await interaction.update({ embeds: [embed], components: [adminRow] });
                 return interaction.followUp({ content: `🏠 Stock dikembalikan ke default: **${stockData.defaultStock}** key.`, ephemeral: true });
             }
+        }
 
         // --- HANDLE MODALS ---
         if (interaction.isModalSubmit()) {
@@ -958,10 +959,12 @@ module.exports = {
                 const adminRow = buildAdminRow();
 
                 try {
-                    const channel = interaction.client.channels.cache.get(stockData.channelId);
-                    if (channel && stockData.messageId) {
-                        const msg = await channel.messages.fetch(stockData.messageId);
-                        await msg.edit({ embeds: [embed], components: [adminRow] });
+                    if (stockData.channelId && stockData.messageId) {
+                        const ch = await interaction.client.channels.fetch(stockData.channelId);
+                        if (ch) {
+                            const msg = await ch.messages.fetch(stockData.messageId);
+                            await msg.edit({ embeds: [embed], components: [adminRow] });
+                        }
                     }
                 } catch (e) {}
 
@@ -987,10 +990,12 @@ module.exports = {
                 const adminRow = buildAdminRow();
 
                 try {
-                    const channel = interaction.client.channels.cache.get(stockData.channelId);
-                    if (channel && stockData.messageId) {
-                        const msg = await channel.messages.fetch(stockData.messageId);
-                        await msg.edit({ embeds: [embed], components: [adminRow] });
+                    if (stockData.channelId && stockData.messageId) {
+                        const ch = await interaction.client.channels.fetch(stockData.channelId);
+                        if (ch) {
+                            const msg = await ch.messages.fetch(stockData.messageId);
+                            await msg.edit({ embeds: [embed], components: [adminRow] });
+                        }
                     }
                 } catch (e) {}
 
