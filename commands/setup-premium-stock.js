@@ -26,7 +26,7 @@ function buildStockEmbed(stockData) {
         .setThumbnail('attachment://logo.png')
         .setDescription(
             `**Current Stock:** \`${currentStock}\` keys\n\n` +
-            `Beli premium key di **syshub.site** atau buka ticket di server.`
+            `Beli premium key dengan membuka ticket di server.`
         )
         .setFooter({ text: 'SysHub Premium System' })
         .setTimestamp();
