@@ -1,11 +1,9 @@
 const { Events, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, PermissionFlagsBits, ChannelType, ModalBuilder, TextInputBuilder, TextInputStyle, AttachmentBuilder } = require('discord.js');
 const { getEmbed, getButtons } = require('../utils/welcomeEmbed');
 const { generateCaptcha, generateCaptchaImage } = require('../utils/captcha');
-const { buildStockEmbed, buildAdminRow, loadStock, saveStock } = require('../commands/setup-premium-stock');
+const { buildStockEmbed, buildAdminEmbed, buildAdminRow, loadStock, saveStock, updateBothPanels } = require('../commands/setup-premium-stock');
 const QRCode = require('qrcode');
 const path = require('path');
-
-const LOGO_PATH = path.join(__dirname, '..', 'logo.png');
 
 const JOKI_TICKET_LOG_CHANNEL = '1545265772731957388';
 const JOKI_CATEGORY_ID = '1545263915158478898';
@@ -718,9 +716,10 @@ module.exports = {
                 stockData.currentStock = 0;
                 saveStock(stockData);
 
-                const embed = buildStockEmbed(stockData);
+                const adminEmbed = buildAdminEmbed(stockData);
                 const adminRow = buildAdminRow();
-                await interaction.update({ embeds: [embed], components: [adminRow] });
+                await interaction.update({ embeds: [adminEmbed], components: [adminRow] });
+                await updateBothPanels(interaction.client);
                 return interaction.followUp({ content: '🔄 Stock telah direset ke **0**.', ephemeral: true });
             }
 
@@ -733,9 +732,10 @@ module.exports = {
                 stockData.currentStock = stockData.defaultStock;
                 saveStock(stockData);
 
-                const embed = buildStockEmbed(stockData);
+                const adminEmbed = buildAdminEmbed(stockData);
                 const adminRow = buildAdminRow();
-                await interaction.update({ embeds: [embed], components: [adminRow] });
+                await interaction.update({ embeds: [adminEmbed], components: [adminRow] });
+                await updateBothPanels(interaction.client);
                 return interaction.followUp({ content: `🏠 Stock dikembalikan ke default: **${stockData.defaultStock}** key.`, ephemeral: true });
             }
         }
@@ -957,19 +957,7 @@ module.exports = {
                 stockData.currentStock += amount;
                 saveStock(stockData);
 
-                const embed = buildStockEmbed(stockData);
-                const adminRow = buildAdminRow();
-                const logoFile = new AttachmentBuilder(LOGO_PATH, { name: 'logo.png' });
-
-                try {
-                    if (stockData.channelId && stockData.messageId) {
-                        const ch = await interaction.client.channels.fetch(stockData.channelId);
-                        if (ch) {
-                            const msg = await ch.messages.fetch(stockData.messageId);
-                            await msg.edit({ embeds: [embed], components: [adminRow], files: [logoFile] });
-                        }
-                    }
-                } catch (e) {}
+                await updateBothPanels(interaction.client);
 
                 return interaction.reply({ content: `➕ Stock ditambah **${amount}** key. Total sekarang: **${stockData.currentStock}**`, ephemeral: true });
             }
@@ -989,19 +977,7 @@ module.exports = {
                 stockData.currentStock -= amount;
                 saveStock(stockData);
 
-                const embed = buildStockEmbed(stockData);
-                const adminRow = buildAdminRow();
-                const logoFile = new AttachmentBuilder(LOGO_PATH, { name: 'logo.png' });
-
-                try {
-                    if (stockData.channelId && stockData.messageId) {
-                        const ch = await interaction.client.channels.fetch(stockData.channelId);
-                        if (ch) {
-                            const msg = await ch.messages.fetch(stockData.messageId);
-                            await msg.edit({ embeds: [embed], components: [adminRow], files: [logoFile] });
-                        }
-                    }
-                } catch (e) {}
+                await updateBothPanels(interaction.client);
 
                 return interaction.reply({ content: `➖ Stock dikurangi **${amount}** key. Total sekarang: **${stockData.currentStock}**`, ephemeral: true });
             }

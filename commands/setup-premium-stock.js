@@ -9,7 +9,7 @@ function loadStock() {
     try {
         return JSON.parse(fs.readFileSync(STOCK_FILE, 'utf8'));
     } catch {
-        return { defaultStock: 5, currentStock: 5, channelId: '1494149019864137780', messageId: null };
+        return { defaultStock: 5, currentStock: 5, channelId: '1494149019864137780', messageId: null, adminChannelId: '1514177930903687330', adminMessageId: null };
     }
 }
 
@@ -29,6 +29,21 @@ function buildStockEmbed(stockData) {
             `Beli premium key di **syshub.site** atau buka ticket di server.`
         )
         .setFooter({ text: 'SysHub Premium System' })
+        .setTimestamp();
+}
+
+function buildAdminEmbed(stockData) {
+    const { currentStock, defaultStock } = stockData;
+
+    return new EmbedBuilder()
+        .setColor('#FFD700')
+        .setTitle('⚙️ Premium Stock Admin Panel')
+        .setThumbnail('attachment://logo.png')
+        .setDescription(
+            `**Current Stock:** \`${currentStock}\` keys\n` +
+            `**Default Stock:** \`${defaultStock}\` keys/month`
+        )
+        .setFooter({ text: 'SysHub Admin Panel' })
         .setTimestamp();
 }
 
@@ -58,6 +73,35 @@ function buildAdminRow() {
         );
 }
 
+async function updateBothPanels(client) {
+    const stockData = loadStock();
+    const logoFile = new AttachmentBuilder(LOGO_PATH, { name: 'logo.png' });
+    const stockEmbed = buildStockEmbed(stockData);
+    const adminEmbed = buildAdminEmbed(stockData);
+    const adminRow = buildAdminRow();
+
+    if (stockData.channelId && stockData.messageId) {
+        try {
+            const ch = await client.channels.fetch(stockData.channelId);
+            if (ch) {
+                const msg = await ch.messages.fetch(stockData.messageId);
+                await msg.edit({ embeds: [stockEmbed], files: [logoFile] });
+            }
+        } catch (e) {}
+    }
+
+    if (stockData.adminChannelId && stockData.adminMessageId) {
+        try {
+            const ch = await client.channels.fetch(stockData.adminChannelId);
+            if (ch) {
+                const msg = await ch.messages.fetch(stockData.adminMessageId);
+                const adminLogo = new AttachmentBuilder(LOGO_PATH, { name: 'logo.png' });
+                await msg.edit({ embeds: [adminEmbed], components: [adminRow], files: [adminLogo] });
+            }
+        } catch (e) {}
+    }
+}
+
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('setup-premium-stock')
@@ -66,33 +110,47 @@ module.exports = {
     async execute(interaction) {
         await interaction.deferReply({ ephemeral: true });
 
-        const targetChannelId = '1494149019864137780';
-        let channel;
-        try {
-            channel = await interaction.client.channels.fetch(targetChannelId);
-        } catch {
-            channel = null;
-        }
+        const stockChannelId = '1494149019864137780';
+        const adminChannelId = '1514177930903687330';
 
-        if (!channel) {
-            return interaction.editReply({ content: 'Channel premium stock tidak ditemukan!' });
+        let stockChannel, adminChannel;
+        try {
+            stockChannel = await interaction.client.channels.fetch(stockChannelId);
+        } catch { stockChannel = null; }
+        try {
+            adminChannel = await interaction.client.channels.fetch(adminChannelId);
+        } catch { adminChannel = null; }
+
+        if (!stockChannel) {
+            return interaction.editReply({ content: 'Channel stock tidak ditemukan!' });
+        }
+        if (!adminChannel) {
+            return interaction.editReply({ content: 'Channel admin tidak ditemukan!' });
         }
 
         const stockData = loadStock();
-        const embed = buildStockEmbed(stockData);
-        const adminRow = buildAdminRow();
         const logoFile = new AttachmentBuilder(LOGO_PATH, { name: 'logo.png' });
 
-        const msg = await channel.send({ embeds: [embed], components: [adminRow], files: [logoFile] });
+        const stockEmbed = buildStockEmbed(stockData);
+        const stockMsg = await stockChannel.send({ embeds: [stockEmbed], files: [logoFile] });
 
-        stockData.channelId = channel.id;
-        stockData.messageId = msg.id;
+        const adminEmbed = buildAdminEmbed(stockData);
+        const adminRow = buildAdminRow();
+        const adminLogo = new AttachmentBuilder(LOGO_PATH, { name: 'logo.png' });
+        const adminMsg = await adminChannel.send({ embeds: [adminEmbed], components: [adminRow], files: [adminLogo] });
+
+        stockData.channelId = stockChannel.id;
+        stockData.messageId = stockMsg.id;
+        stockData.adminChannelId = adminChannel.id;
+        stockData.adminMessageId = adminMsg.id;
         saveStock(stockData);
 
-        await interaction.editReply({ content: `Premium Stock Panel deployed to ${channel}!` });
+        await interaction.editReply({ content: `✅ Stock panel deployed to ${stockChannel}\n✅ Admin panel deployed to ${adminChannel}` });
     },
     buildStockEmbed,
+    buildAdminEmbed,
     buildAdminRow,
     loadStock,
     saveStock,
+    updateBothPanels,
 };

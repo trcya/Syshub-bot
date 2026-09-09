@@ -2,5 +2,7 @@
   "defaultStock": 5,
   "currentStock": 5,
   "channelId": "1494149019864137780",
-  "messageId": null
+  "messageId": null,
+  "adminChannelId": "1514177930903687330",
+  "adminMessageId": null
 }
