@@ -27,8 +27,11 @@ function buildStockEmbed(stockData) {
 
     return new EmbedBuilder()
         .setColor('#FFD700')
+        .setAuthor({
+            name: 'SysHub',
+            icon_url: 'attachment://logo.png'
+        })
         .setTitle('🔐 Premium Key Lifetime Stock')
-        .setThumbnail('attachment://logo.png')
         .setDescription(
             `**Current Stock:** \`${currentStock}\` keys\n` +
             `**Default Stock:** \`${defaultStock}\` keys/month\n\n` +
