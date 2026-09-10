@@ -65,6 +65,16 @@ module.exports = {
                     inline: false
                 },
                 {
+                    name: '🎮 MAIN AKUN (Grow a Chicken Fighter)',
+                    value:
+                        '```\n' +
+                        '1 Jam    — Rp 20.000\n' +
+                        '5 Jam    — Rp 80.000\n' +
+                        '10 Jam   — Rp 150.000\n' +
+                        '```',
+                    inline: false
+                },
+                {
                     name: '📌 INFORMATION',
                     value:
                         '• egg bebas request sesuai kebutuhan\n' +
@@ -89,6 +99,8 @@ module.exports = {
                 '> *bebas request egg yang ingin diambil*\n\n' +
                 '**🔄 REBIRTH (Grow a Chicken Fighter)**\n' +
                 '> Joki rebirth sesuai jumlah yang diinginkan\n\n' +
+                '**🎮 MAIN AKUN (Grow a Chicken Fighter)**\n' +
+                '> Mainin akun bebas request\n\n' +
                 `> 📋 Lihat pricelist lengkap di <#${pricelistChannel.id}>`
             )
             .addFields(
@@ -122,6 +134,11 @@ module.exports = {
                     .setLabel('Rebirth')
                     .setEmoji('🔄')
                     .setStyle(ButtonStyle.Secondary),
+                new ButtonBuilder()
+                    .setCustomId('joki_main_akun')
+                    .setLabel('Main Akun')
+                    .setEmoji('🎮')
+                    .setStyle(ButtonStyle.Danger),
             );
 
         await pricelistChannel.send({ embeds: [pricelistEmbed] });
