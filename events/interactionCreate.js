@@ -131,6 +131,37 @@ module.exports = {
                 return interaction.showModal(modal);
             }
 
+            // === COUNTRY ROLE TOGGLE HANDLERS ===
+            const countryRoleMap = {
+                'country_role_id': '1547633283662086231',
+                'country_role_ph': '1547633286551965776',
+                'country_role_us': '1547633298241626143',
+                'country_role_my': '1547633299864952883',
+                'country_role_vn': '1547633302025015426',
+            };
+
+            if (countryRoleMap[customId]) {
+                const roleId = countryRoleMap[customId];
+                const role = guild.roles.cache.get(roleId);
+                if (!role) {
+                    return interaction.reply({ content: 'Role tidak ditemukan!', ephemeral: true });
+                }
+
+                const hasRole = member.roles.cache.has(roleId);
+                try {
+                    if (hasRole) {
+                        await member.roles.remove(roleId);
+                        return interaction.reply({ content: `🗑️ Role **${role.name}** telah dilepas.`, ephemeral: true });
+                    } else {
+                        await member.roles.add(roleId);
+                        return interaction.reply({ content: `✅ Role **${role.name}** telah ditambahkan.`, ephemeral: true });
+                    }
+                } catch (err) {
+                    console.error('[COUNTRY ROLE] Error:', err.message);
+                    return interaction.reply({ content: 'Gagal mengubah role. Hubungi admin.', ephemeral: true });
+                }
+            }
+
             const logChannel = guild.channels.cache.get(process.env.TICKET_LOG_CHANNEL_ID);
             const staffId = process.env.MIDMAN_STAFF_ID;
 
