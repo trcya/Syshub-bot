@@ -37,6 +37,10 @@
             "status": "ready"
         },
         {
+            "name": "Jump for Animal",
+            "status": "ready"
+        },
+        {
             "name": "Grow a chicken fighter",
             "status": "ready"
         }
