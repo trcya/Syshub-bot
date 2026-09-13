@@ -12,17 +12,24 @@ module.exports = {
         try {
             const message = await interaction.channel.messages.fetch(messageId);
             const reaction = message.reactions.cache.get('🎉');
-            if (!reaction) return interaction.reply({ content: 'Could not find the giveaway reaction!', ephemeral: true });
+            if (!reaction) return interaction.reply({ content: 'Could not find the giveaway reaction! Make sure the message has a 🎉 reaction.', ephemeral: true });
 
             const users = await reaction.users.fetch();
             const entries = users.filter(u => !u.bot).map(u => u.id);
 
-            if (entries.length === 0) return interaction.reply({ content: 'No valid entries found!', ephemeral: true });
+            if (entries.length === 0) return interaction.reply({ content: 'No valid entries found for this giveaway!', ephemeral: true });
 
             const winner = `<@${entries[Math.floor(Math.random() * entries.length)]}>`;
             
-            interaction.reply(`🎉 New winner rerolled: ${winner}!`);
+            const embed = new EmbedBuilder()
+                .setTitle('🎉 GIVEAWAY REROLL 🎉')
+                .setColor('#57F287')
+                .setDescription(`New winner: ${winner}\nTotal entries: **${entries.length}**`)
+                .setTimestamp();
+
+            interaction.reply({ content: `Congratulations ${winner}!`, embeds: [embed] });
         } catch (error) {
+            console.error('[GREROLL] Error:', error.message);
             interaction.reply({ content: 'Invalid message ID or message not found in this channel.', ephemeral: true });
         }
     },

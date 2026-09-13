@@ -56,4 +56,19 @@ if (fs.existsSync(eventsPath)) {
     }
 }
 
+// Giveaway Persistence - load saved giveaways and schedule them
+const { loadGiveaways, scheduleGiveaway } = require('./commands/gstart');
+
+client.once('ready', () => {
+    console.log(`Logged in as ${client.user.tag}`);
+
+    const giveaways = loadGiveaways();
+    if (giveaways.length > 0) {
+        console.log(`[GIVEAWAY] Scheduling ${giveaways.length} active giveaway(s)...`);
+        for (const giveaway of giveaways) {
+            scheduleGiveaway(client, giveaway);
+        }
+    }
+});
+
 client.login(process.env.DISCORD_TOKEN);
