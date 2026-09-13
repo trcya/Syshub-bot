@@ -351,7 +351,7 @@ module.exports = {
                     const preEmbed = new EmbedBuilder()
                         .setTitle(`${serviceEmoji} Joki ${serviceType}`)
                         .setColor('#5865F2')
-                        .setDescription(`Welcome ${user}!\nStaff akan segera membantu kamu.\n\nPilih durasi yang kamu inginkan:\n\n⚠️ **Jika tidak memilih durasi dalam 6 jam, kamu akan di-timeout selama 3 hari dan ticket akan ditutup!**`)
+                        .setDescription(`Welcome ${user}!\nStaff akan segera membantu kamu.\n\nPilih durasi yang kamu inginkan:\n\n⚠️ **Jika tidak memilih durasi dalam 6 jam, kamu akan di-timeout selama 3 hari dan ticket akan ditutup!**${isMainAkun ? '\n\n✅ Auto Rebirth\n✅ Auto UFO (bebas request ayam yang mau di naikin)\n✅ Auto Event (kalo ada event khusus)' : ''}`)
                         .setFooter({ text: 'SysHub Joki Service' })
                         .setTimestamp();
 
@@ -385,22 +385,27 @@ module.exports = {
                     ];
                     const rBtns1 = [
                         { id: 'joki_dur_r1',   label: '1 Rebirth — 1K' },
-                        { id: 'joki_dur_r10',  label: '10 Rebirth — 9K' },
+                        { id: 'joki_dur_r50',  label: '50 Rebirth — 30K' },
                     ];
                     const rBtns2 = [
-                        { id: 'joki_dur_r50',  label: '50 Rebirth — 40K' },
-                        { id: 'joki_dur_r100', label: '100 Rebirth — 80K' },
+                        { id: 'joki_dur_r100', label: '100 Rebirth — 45K' },
+                        { id: 'joki_dur_r500', label: '500 Rebirth — 200K' },
                     ];
-                    const mBtns = [
-                        { id: 'joki_dur_main_1j',  label: '1 Jam — 20K' },
-                        { id: 'joki_dur_main_5j',  label: '5 Jam — 80K' },
-                        { id: 'joki_dur_main_10j', label: '10 Jam — 150K' },
+                    const mBtns1 = [
+                        { id: 'joki_dur_main_6j',  label: '6 Jam — 15K' },
+                        { id: 'joki_dur_main_12j', label: '12 Jam — 25K' },
+                        { id: 'joki_dur_main_1h',  label: '1 Hari — 40K' },
+                    ];
+                    const mBtns2 = [
+                        { id: 'joki_dur_main_5h',  label: '5 Hari — 175K' },
+                        { id: 'joki_dur_main_10h', label: '10 Hari — 300K' },
                     ];
 
                     const rows = [];
                     if (isMainAkun) {
                         rows.push(
-                            new ActionRowBuilder().addComponents(mBtns.map(b => new ButtonBuilder().setCustomId(b.id).setLabel(b.label).setStyle(ButtonStyle.Danger))),
+                            new ActionRowBuilder().addComponents(mBtns1.map(b => new ButtonBuilder().setCustomId(b.id).setLabel(b.label).setStyle(ButtonStyle.Danger))),
+                            new ActionRowBuilder().addComponents(mBtns2.map(b => new ButtonBuilder().setCustomId(b.id).setLabel(b.label).setStyle(ButtonStyle.Danger))),
                         );
                     } else if (isRebirth) {
                         rows.push(
@@ -486,12 +491,14 @@ module.exports = {
                     'joki_dur_egg_21h':  { label: '21 Hari', price: 400000 },
                     'joki_dur_egg_30h':  { label: '30 Hari', price: 500000 },
                     'joki_dur_r1':       { label: '1 Rebirth', price: 1000 },
-                    'joki_dur_r10':      { label: '10 Rebirth', price: 9000 },
-                    'joki_dur_r50':      { label: '50 Rebirth', price: 40000 },
-                    'joki_dur_r100':     { label: '100 Rebirth', price: 80000 },
-                    'joki_dur_main_1j':  { label: '1 Jam', price: 20000 },
-                    'joki_dur_main_5j':  { label: '5 Jam', price: 80000 },
-                    'joki_dur_main_10j': { label: '10 Jam', price: 150000 },
+                    'joki_dur_r50':      { label: '50 Rebirth', price: 30000 },
+                    'joki_dur_r100':     { label: '100 Rebirth', price: 45000 },
+                    'joki_dur_r500':     { label: '500 Rebirth', price: 200000 },
+                    'joki_dur_main_6j':  { label: '6 Jam', price: 15000 },
+                    'joki_dur_main_12j': { label: '12 Jam', price: 25000 },
+                    'joki_dur_main_1h':  { label: '1 Hari', price: 40000 },
+                    'joki_dur_main_5h':  { label: '5 Hari', price: 175000 },
+                    'joki_dur_main_10h': { label: '10 Hari', price: 300000 },
                 };
 
                 const opt = jokiDurMap[customId];

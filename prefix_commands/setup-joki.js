@@ -58,20 +58,25 @@ module.exports = {
                     value:
                         '```\n' +
                         '1 Rebirth   — Rp 1.000\n' +
-                        '10 Rebirth  — Rp 9.000\n' +
-                        '50 Rebirth  — Rp 40.000\n' +
-                        '100 Rebirth — Rp 80.000\n' +
+                        '50 Rebirth  — Rp 30.000\n' +
+                        '100 Rebirth — Rp 45.000\n' +
+                        '500 Rebirth — Rp 200.000\n' +
                         '```',
                     inline: false
                 },
                 {
-                    name: '🎮 MAIN AKUN (Grow a Chicken Fighter)',
+                    name: '🎮 MAIN AKUN / AFK (Grow a Chicken Fighter)',
                     value:
                         '```\n' +
-                        '1 Jam    — Rp 20.000\n' +
-                        '5 Jam    — Rp 80.000\n' +
-                        '10 Jam   — Rp 150.000\n' +
-                        '```',
+                        '6 Jam    — Rp 15.000\n' +
+                        '12 Jam   — Rp 25.000\n' +
+                        '1 Hari   — Rp 40.000\n' +
+                        '5 Hari   — Rp 175.000\n' +
+                        '10 Hari  — Rp 300.000\n' +
+                        '```\n' +
+                        '✅ Auto Rebirth\n' +
+                        '✅ Auto UFO (bebas request ayam yang mau di naikin)\n' +
+                        '✅ Auto Event (kalo ada event khusus)',
                     inline: false
                 },
                 {
