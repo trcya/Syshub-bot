@@ -2,7 +2,7 @@
 echo "=== Updating SysHub Bot ==="
 
 git stash
-git pull origin main
+git pull origin $(git branch --show-current)
 git stash pop || true
 npm install
 
