@@ -9,7 +9,7 @@ function loadStock() {
     try {
         return JSON.parse(fs.readFileSync(STOCK_FILE, 'utf8'));
     } catch {
-        return { defaultStock: 5, currentStock: 5, channelId: '1494149019864137780', messageId: null, adminChannelId: '1514177930903687330', adminMessageId: null };
+        return { defaultStock: 5, currentStock: 5, channelId: '1494149019864137780', messageId: '1547273197911548035', adminChannelId: '1514177930903687330', adminMessageId: '1547273194833191063' };
     }
 }
 
