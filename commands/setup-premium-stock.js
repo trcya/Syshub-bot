@@ -86,8 +86,11 @@ async function updateBothPanels(client) {
             if (ch) {
                 const msg = await ch.messages.fetch(stockData.messageId);
                 await msg.edit({ embeds: [stockEmbed], files: [logoFile] });
+                console.log(`[STOCK] Panel stock updated: ${stockData.messageId} | stock=${stockData.currentStock}`);
             }
-        } catch (e) {}
+        } catch (e) {
+            console.error('[STOCK] Gagal update panel stock:', e.message);
+        }
     }
 
     if (stockData.adminChannelId && stockData.adminMessageId) {
@@ -97,8 +100,11 @@ async function updateBothPanels(client) {
                 const msg = await ch.messages.fetch(stockData.adminMessageId);
                 const adminLogo = new AttachmentBuilder(LOGO_PATH, { name: 'logo.png' });
                 await msg.edit({ embeds: [adminEmbed], components: [adminRow], files: [adminLogo] });
+                console.log(`[STOCK] Admin panel updated: ${stockData.adminMessageId} | stock=${stockData.currentStock}`);
             }
-        } catch (e) {}
+        } catch (e) {
+            console.error('[STOCK] Gagal update admin panel:', e.message);
+        }
     }
 }
 
