@@ -2,7 +2,6 @@ const { Events, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Perm
 const { getEmbed, getButtons } = require('../utils/welcomeEmbed');
 const { generateCaptcha, generateCaptchaImage } = require('../utils/captcha');
 const { buildStockEmbed, buildAdminEmbed, buildAdminRow, loadStock, saveStock, updateBothPanels } = require('../commands/setup-premium-stock');
-const { buildRulesEmbed, buildLangRow } = require('../commands/setup-rules');
 const QRCode = require('qrcode');
 const path = require('path');
 
@@ -801,10 +800,27 @@ module.exports = {
             // === RULES LANGUAGE HANDLERS ===
             if (customId === 'rules_lang_en' || customId === 'rules_lang_id') {
                 const lang = customId === 'rules_lang_en' ? 'en' : 'id';
+                const isEn = lang === 'en';
+
+                const rulesEmbed = new EmbedBuilder()
+                    .setColor('#2F3136')
+                    .setTitle(isEn ? 'Server Rules' : 'Peraturan Server')
+                    .setThumbnail('attachment://logo.png')
+                    .setDescription(
+                        isEn
+                            ? 'Hello and welcome to the SysHub Discord Server! We want everyone to have fun here, regardless of background or rank, so we\'ve got a few rules you\'ll need to follow:\n\n**1. Respect Everyone**\nTreat others with kindness and respect. No harassment, toxic behavior, or personal attacks.\n\n**2. No Controversial Topics**\nAvoid discussions about politics, religion, or sensitive issues that could create conflicts. Keep the vibe positive!\n\n**3. Zero Tolerance for Hate Speech**\nNo racism, sexism, homophobia, or any form of discrimination. This includes offensive slurs, derogatory language, and targeted hate.\n\n**4. No Spam or Unwanted Promotions**\nAvoid sending excessive messages, emojis, caps, pings, or posting Discord invites and self-promo without permission.\n\n**5. Protect Privacy**\nDo not share your personal information or anyone else\'s (e.g., real name, address, phone number, DMs, or private messages).\n\n**6. Report Issues, Don\'t Handle Them Yourself**\nIf you see someone breaking the rules, report it to the moderators instead of engaging. False reports will result in punishment.\n\n**7. Follow Discord Terms of Service**\nAny violation of Discord\'s ToS is strictly forbidden. If Discord doesn\'t allow it, neither do we.'
+                            : 'Halo dan selamat datang di Discord Server SysHub! Kami ingin semua orang bersenang-senang di sini, tanpa memandang latar belakang atau rank, jadi ada beberapa peraturan yang harus kamu ikuti:\n\n**1. Hormati Semua Orang**\nPerlakukan orang lain dengan baik dan hormat. Tidak boleh bullying, perilaku toxic, atau serangan pribadi.\n\n**2. Dilarang Bahas Topik Sensitif**\nHindari diskusi tentang politik, agama, atau isu-isu sensitif yang bisa menimbulkan konflik. Jaga suasana tetap positif!\n\n**3. Toleransi Nol untuk Hate Speech**\nTidak boleh rasisme, seksisme, homofobia, atau bentuk diskriminasi apapun. Ini termasuk kata-kata kasar, bahasa merendahkan, dan kebencian yang ditargetkan.\n\n**4. Dilarang Spam atau Promosi Tidak Diinginkan**\nHindari mengirim pesan berlebihan, emoji, huruf kapital, ping, atau memposting undangan Discord dan self-promo tanpa izin.\n\n**5. Jaga Privasi**\nJangan membagikan informasi pribadi kamu atau orang lain (contoh: nama asli, alamat, nomor telepon, DM, atau pesan pribadi).\n\n**6. Laporkan Masalah, Jangan Selesaikan Sendiri**\nJika kamu melihat seseorang melanggar peraturan, laporkan ke moderator alih-alih terlibat langsung. Laporan palsu akan dikenakan sanksi.\n\n**7. Patuhi Syarat Layanan Discord**\nPelanggaran terhadap ToS Discord sangat dilarang. Jika Discord tidak mengizinkannya, kami juga tidak.'
+                    )
+                    .setFooter({ text: isEn ? 'SysHub Server Rules' : 'Peraturan Server SysHub', icon_url: 'attachment://logo.png' })
+                    .setTimestamp();
+
+                const langRow = new ActionRowBuilder().addComponents(
+                    new ButtonBuilder().setCustomId('rules_lang_en').setLabel('English').setStyle(ButtonStyle.Primary).setEmoji('🇬🇧'),
+                    new ButtonBuilder().setCustomId('rules_lang_id').setLabel('Indonesia').setStyle(ButtonStyle.Success).setEmoji('🇮🇩'),
+                );
+
                 const logoFile = new AttachmentBuilder(path.join(__dirname, '..', 'logo.png'), { name: 'logo.png' });
-                const embed = buildRulesEmbed(lang);
-                const row = buildLangRow();
-                return interaction.update({ embeds: [embed], components: [row], files: [logoFile] });
+                return interaction.update({ embeds: [rulesEmbed], components: [langRow], files: [logoFile] });
             }
         }
 
