@@ -2,6 +2,7 @@ const { Events, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Perm
 const { getEmbed, getButtons } = require('../utils/welcomeEmbed');
 const { generateCaptcha, generateCaptchaImage } = require('../utils/captcha');
 const { buildStockEmbed, buildAdminEmbed, buildAdminRow, loadStock, saveStock, updateBothPanels } = require('../commands/setup-premium-stock');
+const { buildRulesEmbed, buildLangRow } = require('../commands/setup-rules');
 const QRCode = require('qrcode');
 const path = require('path');
 
@@ -795,6 +796,15 @@ module.exports = {
                 await interaction.update({ embeds: [adminEmbed], components: [adminRow] });
                 await updateBothPanels(interaction.client);
                 return interaction.followUp({ content: `🏠 Stock dikembalikan ke default: **${stockData.defaultStock}** key.`, ephemeral: true });
+            }
+
+            // === RULES LANGUAGE HANDLERS ===
+            if (customId === 'rules_lang_en' || customId === 'rules_lang_id') {
+                const lang = customId === 'rules_lang_en' ? 'en' : 'id';
+                const logoFile = new AttachmentBuilder(path.join(__dirname, '..', 'logo.png'), { name: 'logo.png' });
+                const embed = buildRulesEmbed(lang);
+                const row = buildLangRow();
+                return interaction.update({ embeds: [embed], components: [row], files: [logoFile] });
             }
         }
 
