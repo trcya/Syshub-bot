@@ -1,13 +1,15 @@
-const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, PermissionFlagsBits } = require('discord.js');
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, PermissionFlagsBits } = require('discord.js');
 
 module.exports = {
-    data: new SlashCommandBuilder()
-        .setName('setup-hiring')
-        .setDescription('Send the Hiring Ticket Panel')
-        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
-    async execute(interaction) {
-        const channel = interaction.guild.channels.cache.get('1549563222082850847');
-        if (!channel) return interaction.reply({ content: 'Hiring channel not found!', ephemeral: true });
+    name: 'setup-hiring',
+    description: 'Send the Hiring Ticket Panel',
+    async execute(message, args) {
+        if (!message.member.permissions.has(PermissionFlagsBits.Administrator)) {
+            return message.reply('You need Administrator permission to use this command!');
+        }
+
+        const channel = message.guild.channels.cache.get('1549563222082850847');
+        if (!channel) return message.reply('Hiring channel not found!');
 
         const embed = new EmbedBuilder()
             .setTitle('🚨 WE\'RE HIRING: STREAMER & CREATOR')
@@ -56,6 +58,6 @@ module.exports = {
             );
 
         await channel.send({ embeds: [embed], components: [row] });
-        await interaction.reply({ content: 'Hiring Panel has been sent!', ephemeral: true });
+        await message.reply('Hiring Panel has been sent!');
     },
 };
