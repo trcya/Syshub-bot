@@ -310,7 +310,7 @@ module.exports = {
             // STREAMER / CREATOR BUTTON - SHOW FORM MODAL
             if (customId === 'hiring_streamer' || customId === 'hiring_creator') {
                 const roleType = customId === 'hiring_streamer' ? 'Streamer' : 'Creator';
-                const ticketName = `hiring-${user.username}`;
+                const ticketName = `${roleType.toLowerCase()}-${user.username}`;
                 const existingTicket = guild.channels.cache.find(c => c.name === ticketName.toLowerCase());
                 if (existingTicket) return interaction.reply({ content: `You already have an open ticket: ${existingTicket}`, ephemeral: true });
 
@@ -1167,7 +1167,7 @@ module.exports = {
                 const roleType = pending?.roleType || 'Unknown';
                 pendingHiring.delete(user.id);
 
-                const ticketName = `hiring-${user.username}`;
+                const ticketName = `${roleType.toLowerCase()}-${user.username}`;
                 const existingTicket = guild.channels.cache.find(c => c.name === ticketName.toLowerCase());
                 if (existingTicket) {
                     return interaction.reply({ content: `You already have an open ticket: ${existingTicket}`, ephemeral: true });
