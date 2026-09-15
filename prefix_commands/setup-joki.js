@@ -23,16 +23,16 @@ module.exports = {
                     name: '🏃 TREADMILL ONLY',
                     value:
                         '```\n' +
-                        '6 Jam     — Rp 7.000\n' +
-                        '12 Jam    — Rp 10.000\n' +
-                        '1 Hari    — Rp 15.000\n' +
-                        '2 Hari    — Rp 25.000\n' +
-                        '3 Hari    — Rp 35.000\n' +
-                        '5 Hari    — Rp 50.000\n' +
-                        '7 Hari    — Rp 65.000\n' +
-                        '14 Hari   — Rp 120.000\n' +
-                        '21 Hari   — Rp 170.000\n' +
-                        '30 Hari   — Rp 220.000\n' +
+                        '6 Jam     — Rp 5.000\n' +
+                        '12 Jam    — Rp 8.000\n' +
+                        '1 Hari    — Rp 12.000\n' +
+                        '2 Hari    — Rp 20.000\n' +
+                        '3 Hari    — Rp 30.000\n' +
+                        '5 Hari    — Rp 42.000\n' +
+                        '7 Hari    — Rp 55.000\n' +
+                        '14 Hari   — Rp 100.000\n' +
+                        '21 Hari   — Rp 140.000\n' +
+                        '30 Hari   — Rp 180.000\n' +
                         '```',
                     inline: false
                 },
@@ -40,16 +40,29 @@ module.exports = {
                     name: '🥚 TREADMILL + STEAL EGG',
                     value:
                         '```\n' +
-                        '6 Jam     — Rp 14.000\n' +
-                        '12 Jam    — Rp 22.000\n' +
-                        '1 Hari    — Rp 35.000\n' +
-                        '2 Hari    — Rp 60.000\n' +
-                        '3 Hari    — Rp 85.000\n' +
-                        '5 Hari    — Rp 130.000\n' +
-                        '7 Hari    — Rp 170.000\n' +
-                        '14 Hari   — Rp 300.000\n' +
-                        '21 Hari   — Rp 400.000\n' +
-                        '30 Hari   — Rp 500.000\n' +
+                        '6 Jam     — Rp 10.000\n' +
+                        '12 Jam    — Rp 16.000\n' +
+                        '1 Hari    — Rp 25.000\n' +
+                        '2 Hari    — Rp 45.000\n' +
+                        '3 Hari    — Rp 65.000\n' +
+                        '5 Hari    — Rp 95.000\n' +
+                        '7 Hari    — Rp 125.000\n' +
+                        '14 Hari   — Rp 220.000\n' +
+                        '21 Hari   — Rp 300.000\n' +
+                        '30 Hari   — Rp 375.000\n' +
+                        '```',
+                    inline: false
+                },
+                {
+                    name: '🔒 PRIVATE SERVER RENTAL',
+                    value:
+                        '```\n' +
+                        '3 Jam     — Rp 5.000\n' +
+                        '6 Jam     — Rp 9.000\n' +
+                        '12 Jam    — Rp 15.000\n' +
+                        '1 Hari    — Rp 25.000\n' +
+                        '3 Hari    — Rp 60.000\n' +
+                        '7 Hari    — Rp 120.000\n' +
                         '```',
                     inline: false
                 },
@@ -102,6 +115,8 @@ module.exports = {
                 '**🥚 TREADMILL + STEAL EGG**\n' +
                 '> AFK treadmill + Steal an Egg\n' +
                 '> *bebas request egg yang ingin diambil*\n\n' +
+                '**🔒 PRIVATE SERVER RENTAL**\n' +
+                '> Sewa private server untuk AFK\n\n' +
                 '**🔄 REBIRTH (Grow a Chicken Fighter)**\n' +
                 '> Joki rebirth sesuai jumlah yang diinginkan\n\n' +
                 '**🎮 MAIN AKUN (Grow a Chicken Fighter)**\n' +
@@ -134,6 +149,11 @@ module.exports = {
                     .setLabel('Treadmill + Steal Egg')
                     .setEmoji('🥚')
                     .setStyle(ButtonStyle.Success),
+                new ButtonBuilder()
+                    .setCustomId('joki_private_server')
+                    .setLabel('Private Server')
+                    .setEmoji('🔒')
+                    .setStyle(ButtonStyle.Primary),
                 new ButtonBuilder()
                     .setCustomId('joki_rebirth')
                     .setLabel('Rebirth')

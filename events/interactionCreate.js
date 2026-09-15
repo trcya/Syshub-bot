@@ -304,9 +304,10 @@ module.exports = {
 
             // === JOKI TICKET HANDLERS ===
 
-            // 5. JOKI TREADMILL / TREADMILL+EGG / REBIRTH / MAIN AKUN BUTTON - Create ticket
-            if (customId === 'joki_treadmill' || customId === 'joki_treadmill_egg' || customId === 'joki_rebirth' || customId === 'joki_main_akun') {
+            // 5. JOKI TREADMILL / TREADMILL+EGG / PRIVATE SERVER / REBIRTH / MAIN AKUN BUTTON - Create ticket
+            if (customId === 'joki_treadmill' || customId === 'joki_treadmill_egg' || customId === 'joki_private_server' || customId === 'joki_rebirth' || customId === 'joki_main_akun') {
                 const isEgg = customId === 'joki_treadmill_egg';
+                const isPrivateServer = customId === 'joki_private_server';
                 const isRebirth = customId === 'joki_rebirth';
                 const isMainAkun = customId === 'joki_main_akun';
                 let serviceType, serviceEmoji;
@@ -317,6 +318,9 @@ module.exports = {
                 } else if (isRebirth) {
                     serviceType = 'Rebirth';
                     serviceEmoji = '🔄';
+                } else if (isPrivateServer) {
+                    serviceType = 'Private Server Rental';
+                    serviceEmoji = '🔒';
                 } else if (isEgg) {
                     serviceType = 'Treadmill + Steal Egg';
                     serviceEmoji = '🥚';
@@ -356,32 +360,42 @@ module.exports = {
                         .setTimestamp();
 
                     const tBtns1 = [
-                        { id: 'joki_dur_6j',  label: '6 Jam — 7K' },
-                        { id: 'joki_dur_12j', label: '12 Jam — 10K' },
-                        { id: 'joki_dur_1h',  label: '1 Hari — 15K' },
-                        { id: 'joki_dur_2h',  label: '2 Hari — 25K' },
-                        { id: 'joki_dur_3h',  label: '3 Hari — 35K' },
+                        { id: 'joki_dur_6j',  label: '6 Jam — 5K' },
+                        { id: 'joki_dur_12j', label: '12 Jam — 8K' },
+                        { id: 'joki_dur_1h',  label: '1 Hari — 12K' },
+                        { id: 'joki_dur_2h',  label: '2 Hari — 20K' },
+                        { id: 'joki_dur_3h',  label: '3 Hari — 30K' },
                     ];
                     const tBtns2 = [
-                        { id: 'joki_dur_5h',  label: '5 Hari — 50K' },
-                        { id: 'joki_dur_7h',  label: '7 Hari — 65K' },
-                        { id: 'joki_dur_14h', label: '14 Hari — 120K' },
-                        { id: 'joki_dur_21h', label: '21 Hari — 170K' },
-                        { id: 'joki_dur_30h', label: '30 Hari — 220K' },
+                        { id: 'joki_dur_5h',  label: '5 Hari — 42K' },
+                        { id: 'joki_dur_7h',  label: '7 Hari — 55K' },
+                        { id: 'joki_dur_14h', label: '14 Hari — 100K' },
+                        { id: 'joki_dur_21h', label: '21 Hari — 140K' },
+                        { id: 'joki_dur_30h', label: '30 Hari — 180K' },
                     ];
                     const eBtns1 = [
-                        { id: 'joki_dur_egg_6j',  label: '6 Jam — 14K' },
-                        { id: 'joki_dur_egg_12j', label: '12 Jam — 22K' },
-                        { id: 'joki_dur_egg_1h',  label: '1 Hari — 35K' },
-                        { id: 'joki_dur_egg_2h',  label: '2 Hari — 60K' },
-                        { id: 'joki_dur_egg_3h',  label: '3 Hari — 85K' },
+                        { id: 'joki_dur_egg_6j',  label: '6 Jam — 10K' },
+                        { id: 'joki_dur_egg_12j', label: '12 Jam — 16K' },
+                        { id: 'joki_dur_egg_1h',  label: '1 Hari — 25K' },
+                        { id: 'joki_dur_egg_2h',  label: '2 Hari — 45K' },
+                        { id: 'joki_dur_egg_3h',  label: '3 Hari — 65K' },
                     ];
                     const eBtns2 = [
-                        { id: 'joki_dur_egg_5h',  label: '5 Hari — 130K' },
-                        { id: 'joki_dur_egg_7h',  label: '7 Hari — 170K' },
-                        { id: 'joki_dur_egg_14h', label: '14 Hari — 300K' },
-                        { id: 'joki_dur_egg_21h', label: '21 Hari — 400K' },
-                        { id: 'joki_dur_egg_30h', label: '30 Hari — 500K' },
+                        { id: 'joki_dur_egg_5h',  label: '5 Hari — 95K' },
+                        { id: 'joki_dur_egg_7h',  label: '7 Hari — 125K' },
+                        { id: 'joki_dur_egg_14h', label: '14 Hari — 220K' },
+                        { id: 'joki_dur_egg_21h', label: '21 Hari — 300K' },
+                        { id: 'joki_dur_egg_30h', label: '30 Hari — 375K' },
+                    ];
+                    const psBtns1 = [
+                        { id: 'joki_dur_ps_3j',  label: '3 Jam — 5K' },
+                        { id: 'joki_dur_ps_6j',  label: '6 Jam — 9K' },
+                        { id: 'joki_dur_ps_12j', label: '12 Jam — 15K' },
+                    ];
+                    const psBtns2 = [
+                        { id: 'joki_dur_ps_1h',  label: '1 Hari — 25K' },
+                        { id: 'joki_dur_ps_3h',  label: '3 Hari — 60K' },
+                        { id: 'joki_dur_ps_7h',  label: '7 Hari — 120K' },
                     ];
                     const rBtns1 = [
                         { id: 'joki_dur_r1',   label: '1 Rebirth — 1K' },
@@ -411,6 +425,11 @@ module.exports = {
                         rows.push(
                             new ActionRowBuilder().addComponents(rBtns1.map(b => new ButtonBuilder().setCustomId(b.id).setLabel(b.label).setStyle(ButtonStyle.Secondary))),
                             new ActionRowBuilder().addComponents(rBtns2.map(b => new ButtonBuilder().setCustomId(b.id).setLabel(b.label).setStyle(ButtonStyle.Secondary))),
+                        );
+                    } else if (isPrivateServer) {
+                        rows.push(
+                            new ActionRowBuilder().addComponents(psBtns1.map(b => new ButtonBuilder().setCustomId(b.id).setLabel(b.label).setStyle(ButtonStyle.Primary))),
+                            new ActionRowBuilder().addComponents(psBtns2.map(b => new ButtonBuilder().setCustomId(b.id).setLabel(b.label).setStyle(ButtonStyle.Primary))),
                         );
                     } else {
                         const btns = isEgg ? [eBtns1, eBtns2] : [tBtns1, tBtns2];
@@ -470,26 +489,32 @@ module.exports = {
             // 6. JOKI DURATION BUTTON - Update ticket with selected duration
             if (customId.startsWith('joki_dur_')) {
                 const jokiDurMap = {
-                    'joki_dur_6j':       { label: '6 Jam', price: 7000 },
-                    'joki_dur_12j':      { label: '12 Jam', price: 10000 },
-                    'joki_dur_1h':       { label: '1 Hari', price: 15000 },
-                    'joki_dur_2h':       { label: '2 Hari', price: 25000 },
-                    'joki_dur_3h':       { label: '3 Hari', price: 35000 },
-                    'joki_dur_5h':       { label: '5 Hari', price: 50000 },
-                    'joki_dur_7h':       { label: '7 Hari', price: 65000 },
-                    'joki_dur_14h':      { label: '14 Hari', price: 120000 },
-                    'joki_dur_21h':      { label: '21 Hari', price: 170000 },
-                    'joki_dur_30h':      { label: '30 Hari', price: 220000 },
-                    'joki_dur_egg_6j':   { label: '6 Jam', price: 14000 },
-                    'joki_dur_egg_12j':  { label: '12 Jam', price: 22000 },
-                    'joki_dur_egg_1h':   { label: '1 Hari', price: 35000 },
-                    'joki_dur_egg_2h':   { label: '2 Hari', price: 60000 },
-                    'joki_dur_egg_3h':   { label: '3 Hari', price: 85000 },
-                    'joki_dur_egg_5h':   { label: '5 Hari', price: 130000 },
-                    'joki_dur_egg_7h':   { label: '7 Hari', price: 170000 },
-                    'joki_dur_egg_14h':  { label: '14 Hari', price: 300000 },
-                    'joki_dur_egg_21h':  { label: '21 Hari', price: 400000 },
-                    'joki_dur_egg_30h':  { label: '30 Hari', price: 500000 },
+                    'joki_dur_6j':       { label: '6 Jam', price: 5000 },
+                    'joki_dur_12j':      { label: '12 Jam', price: 8000 },
+                    'joki_dur_1h':       { label: '1 Hari', price: 12000 },
+                    'joki_dur_2h':       { label: '2 Hari', price: 20000 },
+                    'joki_dur_3h':       { label: '3 Hari', price: 30000 },
+                    'joki_dur_5h':       { label: '5 Hari', price: 42000 },
+                    'joki_dur_7h':       { label: '7 Hari', price: 55000 },
+                    'joki_dur_14h':      { label: '14 Hari', price: 100000 },
+                    'joki_dur_21h':      { label: '21 Hari', price: 140000 },
+                    'joki_dur_30h':      { label: '30 Hari', price: 180000 },
+                    'joki_dur_egg_6j':   { label: '6 Jam', price: 10000 },
+                    'joki_dur_egg_12j':  { label: '12 Jam', price: 16000 },
+                    'joki_dur_egg_1h':   { label: '1 Hari', price: 25000 },
+                    'joki_dur_egg_2h':   { label: '2 Hari', price: 45000 },
+                    'joki_dur_egg_3h':   { label: '3 Hari', price: 65000 },
+                    'joki_dur_egg_5h':   { label: '5 Hari', price: 95000 },
+                    'joki_dur_egg_7h':   { label: '7 Hari', price: 125000 },
+                    'joki_dur_egg_14h':  { label: '14 Hari', price: 220000 },
+                    'joki_dur_egg_21h':  { label: '21 Hari', price: 300000 },
+                    'joki_dur_egg_30h':  { label: '30 Hari', price: 375000 },
+                    'joki_dur_ps_3j':    { label: '3 Jam', price: 5000 },
+                    'joki_dur_ps_6j':    { label: '6 Jam', price: 9000 },
+                    'joki_dur_ps_12j':   { label: '12 Jam', price: 15000 },
+                    'joki_dur_ps_1h':    { label: '1 Hari', price: 25000 },
+                    'joki_dur_ps_3h':    { label: '3 Hari', price: 60000 },
+                    'joki_dur_ps_7h':    { label: '7 Hari', price: 120000 },
                     'joki_dur_r1':       { label: '1 Rebirth', price: 1000 },
                     'joki_dur_r50':      { label: '50 Rebirth', price: 30000 },
                     'joki_dur_r100':     { label: '100 Rebirth', price: 45000 },
@@ -512,6 +537,7 @@ module.exports = {
 
                 const formatPrice = (v) => 'Rp ' + v.toLocaleString('id-ID');
                 const isEgg = customId.includes('egg');
+                const isPrivateServer = customId.includes('ps');
                 const isRebirth = customId.startsWith('joki_dur_r');
                 const isMainAkun = customId.startsWith('joki_dur_main');
                 let serviceType, color;
@@ -522,6 +548,9 @@ module.exports = {
                 } else if (isRebirth) {
                     serviceType = '🔄 Rebirth';
                     color = '#FFD700';
+                } else if (isPrivateServer) {
+                    serviceType = '🔒 Private Server Rental';
+                    color = '#5865F2';
                 } else if (isEgg) {
                     serviceType = '🥚 Treadmill + Steal Egg';
                     color = '#57F287';
