@@ -9,10 +9,13 @@ const JOKI_TICKET_LOG_CHANNEL = '1545265772731957388';
 const JOKI_CATEGORY_ID = '1545263915158478898';
 const JOKI_ROLE_ID = '1498652236257951764';
 const VERIFY_ROLE = '1494143210157510666';
+const HIRING_CATEGORY_ID = '1549562684767338587';
+const HIRING_STAFF_ID = '1498652010977824919';
 
 const jokiTimeouts = new Map();
 const pendingVerifications = new Map();
 const jokiPayments = new Map();
+const pendingHiring = new Map();
 
 async function generateTranscript(channel) {
     let messages = [];
@@ -300,6 +303,66 @@ module.exports = {
                 }
 
                 setTimeout(() => channel.delete(), 2000);
+            }
+
+            // === HIRING TICKET HANDLERS ===
+
+            // STREAMER / CREATOR BUTTON - SHOW FORM MODAL
+            if (customId === 'hiring_streamer' || customId === 'hiring_creator') {
+                const roleType = customId === 'hiring_streamer' ? 'Streamer' : 'Creator';
+                const ticketName = `hiring-${user.username}`;
+                const existingTicket = guild.channels.cache.find(c => c.name === ticketName.toLowerCase());
+                if (existingTicket) return interaction.reply({ content: `You already have an open ticket: ${existingTicket}`, ephemeral: true });
+
+                pendingHiring.set(user.id, { roleType });
+
+                const modal = new ModalBuilder()
+                    .setCustomId('hiring_modal')
+                    .setTitle(`Form Apply ${roleType}`);
+
+                const namaInput = new TextInputBuilder()
+                    .setCustomId('nama_sosmed')
+                    .setLabel('Nama Akun Sosmed (YouTube/TikTok/etc)')
+                    .setStyle(TextInputStyle.Short)
+                    .setPlaceholder('Contoh: @username atau link channel')
+                    .setRequired(true);
+
+                const videoInput = new TextInputBuilder()
+                    .setCustomId('link_video')
+                    .setLabel('Link Video yang Sudah Diupload')
+                    .setStyle(TextInputStyle.Short)
+                    .setPlaceholder('Contoh: https://youtube.com/watch?v=...')
+                    .setRequired(true);
+
+                const firstRow = new ActionRowBuilder().addComponents(namaInput);
+                const secondRow = new ActionRowBuilder().addComponents(videoInput);
+
+                modal.addComponents(firstRow, secondRow);
+
+                await interaction.showModal(modal);
+            }
+
+            // CLOSE HIRING TICKET
+            if (customId === 'close_hiring_ticket') {
+                if (!member.roles.cache.has(HIRING_STAFF_ID) && user.id !== HIRING_STAFF_ID) {
+                    return interaction.reply({ content: 'Only staff can close tickets!', ephemeral: true });
+                }
+
+                await interaction.reply('Closing ticket in 5 seconds...');
+
+                if (logChannel) {
+                    const logEmbed = new EmbedBuilder()
+                        .setTitle('🔒 Hiring Ticket Closed')
+                        .setColor('#ED4245')
+                        .addFields(
+                            { name: 'By', value: `${user} (${user.id})`, inline: true },
+                            { name: 'Channel', value: `${channel.name}`, inline: true },
+                        )
+                        .setTimestamp();
+                    logChannel.send({ embeds: [logEmbed] });
+                }
+
+                setTimeout(() => channel.delete(), 5000);
             }
 
             // === JOKI TICKET HANDLERS ===
@@ -1093,6 +1156,79 @@ module.exports = {
                 await updateBothPanels(interaction.client);
 
                 return interaction.reply({ content: `➖ Stock dikurangi **${amount}** key. Total sekarang: **${stockData.currentStock}**`, ephemeral: true });
+            }
+
+            // HIRING MODAL SUBMIT
+            if (customId === 'hiring_modal') {
+                const namaSosmed = interaction.fields.getTextInputValue('nama_sosmed');
+                const linkVideo = interaction.fields.getTextInputValue('link_video');
+
+                const pending = pendingHiring.get(user.id);
+                const roleType = pending?.roleType || 'Unknown';
+                pendingHiring.delete(user.id);
+
+                const ticketName = `hiring-${user.username}`;
+                const existingTicket = guild.channels.cache.find(c => c.name === ticketName.toLowerCase());
+                if (existingTicket) {
+                    return interaction.reply({ content: `You already have an open ticket: ${existingTicket}`, ephemeral: true });
+                }
+
+                await interaction.deferReply({ ephemeral: true });
+
+                try {
+                    const permissionOverwrites = [
+                        { id: guild.id, deny: [PermissionFlagsBits.ViewChannel] },
+                        { id: user.id, allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages, PermissionFlagsBits.AttachFiles] },
+                        { id: HIRING_STAFF_ID, allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages] },
+                    ];
+
+                    const ticketChannel = await guild.channels.create({
+                        name: ticketName,
+                        type: ChannelType.GuildText,
+                        parent: HIRING_CATEGORY_ID,
+                        permissionOverwrites,
+                    });
+
+                    const roleEmoji = roleType === 'Streamer' ? '🎥' : '🎬';
+
+                    const embed = new EmbedBuilder()
+                        .setTitle(`${roleEmoji} New Hiring Application — ${roleType}`)
+                        .setColor(roleType === 'Streamer' ? '#5865F2' : '#57F287')
+                        .setDescription(`Welcome ${user}!\n\nBerikut data applying kamu:\n\nStaff <@&${HIRING_STAFF_ID}> akan segera mereview aplikasi kamu.`)
+                        .addFields(
+                            { name: '📋 Position', value: roleType, inline: true },
+                            { name: '👤 Nama Akun Sosmed', value: namaSosmed, inline: false },
+                            { name: '🎥 Link Video', value: linkVideo, inline: false },
+                        )
+                        .setFooter({ text: 'SysHub Hiring System' })
+                        .setTimestamp();
+
+                    const row = new ActionRowBuilder()
+                        .addComponents(
+                            new ButtonBuilder().setCustomId('close_hiring_ticket').setLabel('Close').setStyle(ButtonStyle.Danger).setEmoji('🔒'),
+                        );
+
+                    await ticketChannel.send({ content: `${user} | <@&${HIRING_STAFF_ID}>`, embeds: [embed], components: [row] });
+                    await interaction.editReply({ content: `Ticket created: ${ticketChannel}` });
+
+                    if (logChannel) {
+                        const logEmbed = new EmbedBuilder()
+                            .setTitle(`🎫 Hiring Application Opened — ${roleType}`)
+                            .setColor('#57F287')
+                            .addFields(
+                                { name: 'User', value: `${user} (${user.id})`, inline: true },
+                                { name: 'Channel', value: ticketChannel.name, inline: true },
+                                { name: 'Position', value: roleType, inline: true },
+                                { name: 'Akun Sosmed', value: namaSosmed, inline: false },
+                                { name: 'Link Video', value: linkVideo, inline: false },
+                            )
+                            .setTimestamp();
+                        logChannel.send({ embeds: [logEmbed] });
+                    }
+                } catch (error) {
+                    console.error('Failed to create hiring ticket:', error);
+                    await interaction.editReply({ content: 'Failed to create ticket channel. Please contact an administrator.' });
+                }
             }
 
             // VERIFY MODAL SUBMIT
