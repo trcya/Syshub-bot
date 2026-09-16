@@ -343,7 +343,7 @@ module.exports = {
 
                 const extraInput = new TextInputBuilder()
                     .setCustomId('extra_info')
-                    .setLabel(roleType === 'Streamer' ? 'Active live setiap jam & hari' : 'Bisa kreatif dan menyampaikan info dengan baik')
+                    .setLabel(roleType === 'Streamer' ? 'Active live setiap jam & hari' : 'Kreatif sampaikan info dengan baik')
                     .setStyle(TextInputStyle.Short)
                     .setPlaceholder(roleType === 'Streamer' ? 'Contoh: Setiap hari jam 19:00-22:00' : 'Contoh: Ya, sudah biasa buat review/tutorial')
                     .setRequired(true);
