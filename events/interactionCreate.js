@@ -327,6 +327,27 @@ module.exports = {
                     .setPlaceholder('Contoh: @username atau link channel')
                     .setRequired(true);
 
+                const platformInput = new TextInputBuilder()
+                    .setCustomId('platform')
+                    .setLabel(roleType === 'Streamer' ? 'Platform yang digunakan untuk live' : 'Platform yang digunakan untuk konten')
+                    .setStyle(TextInputStyle.Short)
+                    .setPlaceholder('Contoh: YouTube, TikTok, Facebook, dll')
+                    .setRequired(true);
+
+                const scriptInput = new TextInputBuilder()
+                    .setCustomId('paham_script')
+                    .setLabel('Paham seputar script & executor')
+                    .setStyle(TextInputStyle.Short)
+                    .setPlaceholder('Contoh: Ya / Tidak, sudah berapa lama')
+                    .setRequired(true);
+
+                const extraInput = new TextInputBuilder()
+                    .setCustomId('extra_info')
+                    .setLabel(roleType === 'Streamer' ? 'Active live setiap jam & hari' : 'Bisa kreatif dan menyampaikan info dengan baik')
+                    .setStyle(TextInputStyle.Short)
+                    .setPlaceholder(roleType === 'Streamer' ? 'Contoh: Setiap hari jam 19:00-22:00' : 'Contoh: Ya, sudah biasa buat review/tutorial')
+                    .setRequired(true);
+
                 const videoInput = new TextInputBuilder()
                     .setCustomId('link_video')
                     .setLabel('Link Video yang Sudah Diupload')
@@ -334,10 +355,13 @@ module.exports = {
                     .setPlaceholder('Contoh: https://youtube.com/watch?v=...')
                     .setRequired(true);
 
-                const firstRow = new ActionRowBuilder().addComponents(namaInput);
-                const secondRow = new ActionRowBuilder().addComponents(videoInput);
-
-                modal.addComponents(firstRow, secondRow);
+                modal.addComponents(
+                    new ActionRowBuilder().addComponents(namaInput),
+                    new ActionRowBuilder().addComponents(platformInput),
+                    new ActionRowBuilder().addComponents(scriptInput),
+                    new ActionRowBuilder().addComponents(extraInput),
+                    new ActionRowBuilder().addComponents(videoInput),
+                );
 
                 await interaction.showModal(modal);
             }
@@ -1161,6 +1185,9 @@ module.exports = {
             // HIRING MODAL SUBMIT
             if (customId === 'hiring_modal') {
                 const namaSosmed = interaction.fields.getTextInputValue('nama_sosmed');
+                const platform = interaction.fields.getTextInputValue('platform');
+                const pahamScript = interaction.fields.getTextInputValue('paham_script');
+                const extraInfo = interaction.fields.getTextInputValue('extra_info');
                 const linkVideo = interaction.fields.getTextInputValue('link_video');
 
                 const pending = pendingHiring.get(user.id);
@@ -1190,6 +1217,8 @@ module.exports = {
                     });
 
                     const roleEmoji = roleType === 'Streamer' ? '🎥' : '🎬';
+                    const platformLabel = roleType === 'Streamer' ? 'Platform Live' : 'Platform Konten';
+                    const extraLabel = roleType === 'Streamer' ? 'Jadwal Live' : 'Kreatif & Penyampaian Info';
 
                     const embed = new EmbedBuilder()
                         .setTitle(`${roleEmoji} New Hiring Application — ${roleType}`)
@@ -1198,6 +1227,9 @@ module.exports = {
                         .addFields(
                             { name: '📋 Position', value: roleType, inline: true },
                             { name: '👤 Nama Akun Sosmed', value: namaSosmed, inline: false },
+                            { name: '📺 ' + platformLabel, value: platform, inline: false },
+                            { name: '💻 Paham Script & Executor', value: pahamScript, inline: false },
+                            { name: roleType === 'Streamer' ? '🕐 Jadwal Live' : '✨ Kreatif & Penyampaian Info', value: extraInfo, inline: false },
                             { name: '🎥 Link Video', value: linkVideo, inline: false },
                         )
                         .setFooter({ text: 'SysHub Hiring System' })
@@ -1220,6 +1252,9 @@ module.exports = {
                                 { name: 'Channel', value: ticketChannel.name, inline: true },
                                 { name: 'Position', value: roleType, inline: true },
                                 { name: 'Akun Sosmed', value: namaSosmed, inline: false },
+                                { name: platformLabel, value: platform, inline: false },
+                                { name: 'Paham Script', value: pahamScript, inline: false },
+                                { name: extraLabel, value: extraInfo, inline: false },
                                 { name: 'Link Video', value: linkVideo, inline: false },
                             )
                             .setTimestamp();
