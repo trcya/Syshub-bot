@@ -81,7 +81,7 @@ module.exports = {
     async execute(interaction) {
         await interaction.deferReply({ ephemeral: true });
 
-        const targetChannelId = '1543411902137245766';
+        const targetChannelId = process.env.RULES_CHANNEL_ID;
         let targetChannel;
         try {
             targetChannel = await interaction.client.channels.fetch(targetChannelId);

@@ -6,13 +6,13 @@ function getStickyTextId() {
 Selamat datang di **SysHub**! Silakan akses channel di bawah ini:
 
 # 📖 Tutorial
-> Lihat panduan di <#1543492628866400358>
+> Lihat panduan di <#${process.env.TUTORIAL_CHANNEL_ID}>
 
 # 📥 Get Free Script
-> Ambil script gratis di <#1494146608026353714>
+> Ambil script gratis di <#${process.env.FREE_SCRIPTS_CHANNEL_ID}>
 
 # 💎 Buy Premium
-> Beli premium di <#1494149019864137780> atau kunjungi [syshub.site](https://syshub.site)`;
+> Beli premium di <#${process.env.PREMIUM_TICKET_CHANNEL_ID}> atau kunjungi [syshub.site](https://syshub.site)`;
 }
 
 function getStickyTextEn() {
@@ -20,13 +20,13 @@ function getStickyTextEn() {
 Welcome to **SysHub**! Please access the channels below:
 
 # 📖 Tutorial
-> Check the guide at <#1543492628866400358>
+> Check the guide at <#${process.env.TUTORIAL_CHANNEL_ID}>
 
 # 📥 Get Free Script
-> Get free scripts at <#1494146608026353714>
+> Get free scripts at <#${process.env.FREE_SCRIPTS_CHANNEL_ID}>
 
 # 💎 Buy Premium
-> Buy premium at <#1494149019864137780> or visit [syshub.site](https://syshub.site)`;
+> Buy premium at <#${process.env.PREMIUM_TICKET_CHANNEL_ID}> or visit [syshub.site](https://syshub.site)`;
 }
 
 function getStickyVerifyEmbed() {
@@ -53,9 +53,9 @@ function getStickyVerifyEmbed() {
 }
 
 const STICKY_CHANNELS = {
-    '1494149400052633671': { lang: 'id' },
-    '1494149497360617553': { lang: 'en' },
-    '1546462500273262663': { lang: 'verify' }
+    [process.env.STICKY_CHANNEL_ID]: { lang: 'id' },
+    [process.env.STICKY_EN_CHANNEL_ID]: { lang: 'en' },
+    [process.env.STICKY_VERIFY_CHANNEL_ID]: { lang: 'verify' }
 };
 
 const lastStickyMessage = new Map();

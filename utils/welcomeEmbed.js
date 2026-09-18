@@ -13,20 +13,20 @@ function getEmbed(lang) {
             {
                 name: '✅ Verify',
                 value: isId
-                    ? 'Verifikasi di <#1504478063386165392> untuk mengakses server.'
-                    : 'Verify in <#1504478063386165392> to access the server.'
+                    ? `Verifikasi di <#${process.env.VERIFY_CHANNEL_EMBED_ID}> untuk mengakses server.`
+                    : `Verify in <#${process.env.VERIFY_CHANNEL_EMBED_ID}> to access the server.`
             },
             {
                 name: '📦 Free Scripts',
                 value: isId
-                    ? 'Setelah verifikasi, ambil script gratis di <#1494146608026353714>.'
-                    : 'Once verified, grab free scripts in <#1494146608026353714>.'
+                    ? `Setelah verifikasi, ambil script gratis di <#${process.env.FREE_SCRIPTS_CHANNEL_ID}>.`
+                    : `Once verified, grab free scripts in <#${process.env.FREE_SCRIPTS_CHANNEL_ID}>.`
             },
             {
                 name: '💎 Premium',
                 value: isId
-                    ? 'Mau premium? Buka ticket di <#1494149019864137780> atau kunjungi [syshub.site](https://syshub.site).'
-                    : 'Want premium? Open a ticket in <#1494149019864137780> or visit [syshub.site](https://syshub.site).'
+                    ? `Mau premium? Buka ticket di <#${process.env.PREMIUM_TICKET_CHANNEL_ID}> atau kunjungi [syshub.site](https://syshub.site).`
+                    : `Want premium? Open a ticket in <#${process.env.PREMIUM_TICKET_CHANNEL_ID}> or visit [syshub.site](https://syshub.site).`
             }
         )
         .setTimestamp()

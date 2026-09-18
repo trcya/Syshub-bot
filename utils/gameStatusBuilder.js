@@ -5,7 +5,7 @@ const MSG_ID_FILE = path.join(__dirname, '..', 'game_status_msg_id.txt');
 const GAME_STATUS_FILE = path.join(__dirname, '..', 'game-status.json');
 const LOGO_PATH = path.join(__dirname, '..', 'logo.png');
 
-const GAME_STATUS_CHANNEL_ID = '1494147077746331718';
+const GAME_STATUS_CHANNEL_ID = process.env.GAME_STATUS_CHANNEL_ID;
 
 const STATUS_ICONS = {
     ready: '🟢',

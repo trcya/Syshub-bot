@@ -8,7 +8,7 @@ module.exports = {
             return message.reply('You need Administrator permission to use this command!');
         }
 
-        const channel = message.guild.channels.cache.get('1549563222082850847');
+        const channel = message.guild.channels.cache.get(process.env.HIRING_PANEL_CHANNEL_ID);
         if (!channel) return message.reply('Hiring channel not found!');
 
         const embed = new EmbedBuilder()

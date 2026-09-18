@@ -8,10 +8,10 @@ module.exports = {
             return message.reply('You need Administrator permission to use this command!');
         }
 
-        const pricelistChannel = message.guild.channels.cache.get('1546531103324643338');
+        const pricelistChannel = message.guild.channels.cache.get(process.env.JOKI_PRICELIST_CHANNEL_ID);
         if (!pricelistChannel) return message.reply('Pricelist channel not found!');
 
-        const orderChannel = message.guild.channels.cache.get('1494149119256690698');
+        const orderChannel = message.guild.channels.cache.get(process.env.JOKI_ORDER_CHANNEL_ID);
         if (!orderChannel) return message.reply('Order channel not found!');
 
         const pricelistEmbed = new EmbedBuilder()

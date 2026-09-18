@@ -5,12 +5,12 @@ const { buildStockEmbed, buildAdminEmbed, buildAdminRow, loadStock, saveStock, u
 const QRCode = require('qrcode');
 const path = require('path');
 
-const JOKI_TICKET_LOG_CHANNEL = '1545265772731957388';
-const JOKI_CATEGORY_ID = '1545263915158478898';
-const JOKI_ROLE_ID = '1498652236257951764';
-const VERIFY_ROLE = '1494143210157510666';
-const HIRING_CATEGORY_ID = '1549562684767338587';
-const HIRING_STAFF_ID = '1498652010977824919';
+const JOKI_TICKET_LOG_CHANNEL = process.env.JOKI_TICKET_LOG_CHANNEL_ID;
+const JOKI_CATEGORY_ID = process.env.JOKI_CATEGORY_ID;
+const JOKI_ROLE_ID = process.env.JOKI_ROLE_ID;
+const VERIFY_ROLE = process.env.VERIFY_ROLE_ID;
+const HIRING_CATEGORY_ID = process.env.HIRING_CATEGORY_ID;
+const HIRING_STAFF_ID = process.env.HIRING_STAFF_ROLE_ID;
 
 const jokiTimeouts = new Map();
 const pendingVerifications = new Map();
@@ -136,11 +136,11 @@ module.exports = {
 
             // === COUNTRY ROLE TOGGLE HANDLERS ===
             const countryRoleMap = {
-                'country_role_id': '1547633283662086231',
-                'country_role_ph': '1547633286551965776',
-                'country_role_us': '1547633298241626143',
-                'country_role_my': '1547633299864952883',
-                'country_role_vn': '1547633302025015426',
+                'country_role_id': process.env.COUNTRY_ROLE_ID,
+                'country_role_ph': process.env.COUNTRY_ROLE_PH,
+                'country_role_us': process.env.COUNTRY_ROLE_US,
+                'country_role_my': process.env.COUNTRY_ROLE_MY,
+                'country_role_vn': process.env.COUNTRY_ROLE_VN,
             };
 
             if (countryRoleMap[customId]) {

@@ -8,8 +8,8 @@ const path = require('path');
 
 const dbPath = process.env.DATABASE_PATH || path.join(__dirname, '..', 'live-monitor.json');
 
-const CHANNEL_CONTENT = '1494148923013595156';
-const CHANNEL_LIVE = '1494148813441732750';
+const CHANNEL_CONTENT = process.env.CONTENT_CHANNEL_ID;
+const CHANNEL_LIVE = process.env.LIVE_CHANNEL_ID;
 
 let TikTokLiveConnection = null;
 try {

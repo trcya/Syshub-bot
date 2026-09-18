@@ -1,13 +1,13 @@
 const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, PermissionFlagsBits } = require('discord.js');
 
-const TARGET_CHANNEL_ID = '1547633306005274755';
+const TARGET_CHANNEL_ID = process.env.COUNTRY_ROLE_CHANNEL_ID;
 
 const COUNTRIES = [
-    { id: 'id', label: 'Indonesia', roleId: '1547633283662086231', emoji: '🇮🇩' },
-    { id: 'ph', label: 'Philippines', roleId: '1547633286551965776', emoji: '🇵🇭' },
-    { id: 'us', label: 'United States', roleId: '1547633298241626143', emoji: '🇺🇸' },
-    { id: 'my', label: 'Malaysia', roleId: '1547633299864952883', emoji: '🇲🇾' },
-    { id: 'vn', label: 'Vietnam', roleId: '1547633302025015426', emoji: '🇻🇳' },
+    { id: 'id', label: 'Indonesia', roleId: process.env.COUNTRY_ROLE_ID, emoji: '🇮🇩' },
+    { id: 'ph', label: 'Philippines', roleId: process.env.COUNTRY_ROLE_PH, emoji: '🇵🇭' },
+    { id: 'us', label: 'United States', roleId: process.env.COUNTRY_ROLE_US, emoji: '🇺🇸' },
+    { id: 'my', label: 'Malaysia', roleId: process.env.COUNTRY_ROLE_MY, emoji: '🇲🇾' },
+    { id: 'vn', label: 'Vietnam', roleId: process.env.COUNTRY_ROLE_VN, emoji: '🇻🇳' },
 ];
 
 function buildEmbed() {
@@ -21,7 +21,7 @@ function buildEmbed() {
             `Silakan pilih role negara asal atau bahasa yang kamu gunakan dengan mengklik tombol di bawah ini.\n` +
             `Tombol berfungsi sebagai **toggle** (klik sekali untuk mengambil role, klik lagi untuk melepas role).\n\n` +
             `**Daftar Role Negara:**\n${roleList}\n\n` +
-            `Negaramu belum ada di daftar? Kamu bisa tetap ngobrol di channel <#1547633306005274755> / <#other-country-chat> atau <#international-chat>!`
+            `Negaramu belum ada di daftar? Kamu bisa tetap ngobrol di channel <#${process.env.COUNTRY_ROLE_CHANNEL_ID}> / <#other-country-chat> atau <#international-chat>!`
         )
         .setFooter({ text: 'SysHub | Newest Best Exploits • Auto Role System' })
         .setTimestamp();

@@ -16,7 +16,7 @@ module.exports = {
 
         // Check if member just boosted the server
         if (!oldMember.premiumSince && newMember.premiumSince) {
-            const channel = newMember.guild.channels.cache.get('1494152927797973113');
+            const channel = newMember.guild.channels.cache.get(process.env.BOOST_CHANNEL_ID);
             if (channel) {
                 const embed = new EmbedBuilder()
                     .setColor('#F47FFF')

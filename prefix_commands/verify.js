@@ -1,7 +1,7 @@
 const { PermissionFlagsBits, AttachmentBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const path = require('path');
 
-const VERIFY_CHANNEL = '1546462500273262663';
+const VERIFY_CHANNEL = process.env.VERIFY_CHANNEL_ID;
 
 module.exports = {
     name: 'verify',

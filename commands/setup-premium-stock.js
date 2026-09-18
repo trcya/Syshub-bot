@@ -9,7 +9,7 @@ function loadStock() {
     try {
         return JSON.parse(fs.readFileSync(STOCK_FILE, 'utf8'));
     } catch {
-        return { defaultStock: 5, currentStock: 5, channelId: '1494149019864137780', messageId: '1547273197911548035', adminChannelId: '1514177930903687330', adminMessageId: '1547273194833191063' };
+        return { defaultStock: 5, currentStock: 5, channelId: process.env.STOCK_CHANNEL_ID, messageId: '1547273197911548035', adminChannelId: process.env.ADMIN_STOCK_CHANNEL_ID, adminMessageId: '1547273194833191063' };
     }
 }
 
@@ -116,8 +116,8 @@ module.exports = {
     async execute(interaction) {
         await interaction.deferReply({ ephemeral: true });
 
-        const stockChannelId = '1494149019864137780';
-        const adminChannelId = '1514177930903687330';
+        const stockChannelId = process.env.STOCK_CHANNEL_ID;
+        const adminChannelId = process.env.ADMIN_STOCK_CHANNEL_ID;
 
         let stockChannel, adminChannel;
         try {
