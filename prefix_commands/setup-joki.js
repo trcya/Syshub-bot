@@ -81,11 +81,9 @@ module.exports = {
                     name: '🎮 MAIN AKUN / AFK (Grow a Chicken Fighter)',
                     value:
                         '```\n' +
-                        '6 Jam    — Rp 15.000\n' +
-                        '12 Jam   — Rp 25.000\n' +
-                        '1 Hari   — Rp 40.000\n' +
-                        '5 Hari   — Rp 175.000\n' +
-                        '10 Hari  — Rp 300.000\n' +
+                        '1 Jam    — Rp 20.000\n' +
+                        '5 Jam    — Rp 80.000\n' +
+                        '10 Jam   — Rp 150.000\n' +
                         '```\n' +
                         '✅ Auto Rebirth\n' +
                         '✅ Auto UFO (bebas request ayam yang mau di naikin)\n' +
