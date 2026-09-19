@@ -22,7 +22,8 @@
         },
         {
             "name": "Fish It",
-            "status": "ready"
+            "status": "discontinue",
+            "note": "Discontinue"
         },
         {
             "name": "Mine a Mountain",
