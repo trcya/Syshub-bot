@@ -54,7 +54,7 @@ module.exports = {
                     inline: false
                 },
                 {
-                    name: '🐶 RIDE A PET (Upgrade Hatch Luck)',
+                    name: '🐶 RIDE A PET (Up Hatch Luck + Pick Up Egg)',
                     value:
                         '```\n' +
                         '6 Jam     — Rp 5.000\n' +
@@ -71,7 +71,7 @@ module.exports = {
                     inline: false
                 },
                 {
-                    name: '🥚 RIDE A PET (Upgrade Hatch Luck + Pickup Egg)',
+                    name: '🥚 RIDE A PET (Auto Event Steal an Egg)',
                     value:
                         '```\n' +
                         '6 Jam     — Rp 10.000\n' +
@@ -147,10 +147,10 @@ module.exports = {
                 '**🥚 TREADMILL + STEAL EGG**\n' +
                 '> AFK treadmill + Steal an Egg\n' +
                 '> *bebas request egg yang ingin diambil*\n\n' +
-                '**🐶 RIDE A PET (Upgrade Hatch Luck)**\n' +
-                '> AFK Ride a Pet untuk Upgrade Hatch Luck\n\n' +
-                '**🥚 RIDE A PET (Upgrade Hatch Luck + Pickup Egg)**\n' +
-                '> AFK Ride a Pet + Pickup Egg\n\n' +
+                '**🐶 RIDE A PET (Up Hatch Luck + Pick Up Egg)**\n' +
+                '> AFK Ride a Pet - Up Hatch Luck + Pick Up Egg\n\n' +
+                '**🥚 RIDE A PET (Auto Event Steal an Egg)**\n' +
+                '> AFK Ride a Pet - Auto Event Steal an Egg\n\n' +
                 '**🔒 PRIVATE SERVER RENTAL**\n' +
                 '> Sewa private server untuk AFK\n\n' +
                 '**🔄 REBIRTH (Grow a Chicken Fighter)**\n' +
@@ -190,15 +190,15 @@ module.exports = {
                     emoji: '🥚',
                 },
                 {
-                    label: 'Ride a Pet - Upgrade Hatch Luck',
+                    label: 'Ride a Pet - Up Hatch Luck + Pick Up Egg',
                     value: 'joki_rideapet_luck',
-                    description: 'AFK Ride a Pet - Upgrade Hatch Luck',
+                    description: 'AFK Ride a Pet - Up Hatch Luck + Pick Up Egg',
                     emoji: '🐶',
                 },
                 {
-                    label: 'Ride a Pet - Hatch Luck + Pickup Egg',
+                    label: 'Ride a Pet - Auto Event Steal an Egg',
                     value: 'joki_rideapet_luck_egg',
-                    description: 'AFK Ride a Pet - Upgrade Hatch Luck + Pickup Egg',
+                    description: 'AFK Ride a Pet - Auto Event Steal an Egg',
                     emoji: '🥚',
                 },
                 {

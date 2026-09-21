@@ -391,33 +391,6 @@ module.exports = {
 
             // === JOKI TICKET HANDLERS ===
 
-            // 5. JOKI SELECT MENU - SHOW WARNING MODAL FORM
-            if (interaction.isStringSelectMenu() && customId === 'joki_select_service') {
-                const selectedService = interaction.values[0];
-
-                const ticketName = `joki-${user.username}`;
-                const existingTicket = guild.channels.cache.find(c => c.name === ticketName.toLowerCase());
-                if (existingTicket) {
-                    return interaction.reply({ content: `You already have an open ticket: ${existingTicket}`, ephemeral: true });
-                }
-
-                const modal = new ModalBuilder()
-                    .setCustomId(`joki_confirm_modal:${selectedService}`)
-                    .setTitle('⚠️ PERINGATAN HARGA JOKI');
-
-                const warningInput = new TextInputBuilder()
-                    .setCustomId('joki_warning_ack')
-                    .setLabel('PERINGATAN SEBELUM MEMBUAT TICKET')
-                    .setStyle(TextInputStyle.Paragraph)
-                    .setValue('Tolong untuk mengecek harga terlebih dahulu! Jika hanya membuka ticket iseng, kamu akan terkena TIME OUT 3 HARI jika tidak melakukan pemilihan durasi. Tolong baca harga dengan baik.')
-                    .setRequired(true);
-
-                const firstRow = new ActionRowBuilder().addComponents(warningInput);
-                modal.addComponents(firstRow);
-
-                return interaction.showModal(modal);
-            }
-
             // 6. JOKI DURATION BUTTON - Update ticket with selected duration
             if (customId.startsWith('joki_dur_')) {
                 const jokiDurMap = {
@@ -785,6 +758,37 @@ module.exports = {
             }
         }
 
+        // --- HANDLE SELECT MENUS ---
+        if (interaction.isStringSelectMenu()) {
+            const { customId, guild, user, channel, member } = interaction;
+
+            if (customId === 'joki_select_service') {
+                const selectedService = interaction.values[0];
+
+                const ticketName = `joki-${user.username}`;
+                const existingTicket = guild.channels.cache.find(c => c.name === ticketName.toLowerCase());
+                if (existingTicket) {
+                    return interaction.reply({ content: `You already have an open ticket: ${existingTicket}`, ephemeral: true });
+                }
+
+                const modal = new ModalBuilder()
+                    .setCustomId(`joki_confirm_modal:${selectedService}`)
+                    .setTitle('⚠️ PERINGATAN HARGA JOKI');
+
+                const warningInput = new TextInputBuilder()
+                    .setCustomId('joki_warning_ack')
+                    .setLabel('PERINGATAN SEBELUM MEMBUAT TICKET')
+                    .setStyle(TextInputStyle.Paragraph)
+                    .setValue('Tolong untuk mengecek harga terlebih dahulu! Jika hanya membuka ticket iseng, kamu akan terkena TIME OUT 3 HARI jika tidak melakukan pemilihan durasi. Tolong baca harga dengan baik.')
+                    .setRequired(true);
+
+                const firstRow = new ActionRowBuilder().addComponents(warningInput);
+                modal.addComponents(firstRow);
+
+                return interaction.showModal(modal);
+            }
+        }
+
         // --- HANDLE MODALS ---
         if (interaction.isModalSubmit()) {
             const { customId, guild, user, channel, member } = interaction;
@@ -813,10 +817,10 @@ module.exports = {
                     serviceType = 'Private Server Rental';
                     serviceEmoji = '🔒';
                 } else if (isRideapetEgg) {
-                    serviceType = 'Ride a Pet - Hatch Luck + Pickup Egg';
+                    serviceType = 'Ride a Pet - Auto Event Steal an Egg';
                     serviceEmoji = '🥚';
                 } else if (isRideapetLuck) {
-                    serviceType = 'Ride a Pet - Upgrade Hatch Luck';
+                    serviceType = 'Ride a Pet - Up Hatch Luck + Pick Up Egg';
                     serviceEmoji = '🐶';
                 } else if (isEgg) {
                     serviceType = 'Treadmill + Steal Egg';
