@@ -1,4 +1,4 @@
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, PermissionFlagsBits } = require('discord.js');
+const { EmbedBuilder, ActionRowBuilder, StringSelectMenuBuilder, PermissionFlagsBits } = require('discord.js');
 
 module.exports = {
     name: 'setup-joki',
@@ -38,6 +38,40 @@ module.exports = {
                 },
                 {
                     name: '🥚 TREADMILL + STEAL EGG',
+                    value:
+                        '```\n' +
+                        '6 Jam     — Rp 10.000\n' +
+                        '12 Jam    — Rp 16.000\n' +
+                        '1 Hari    — Rp 25.000\n' +
+                        '2 Hari    — Rp 45.000\n' +
+                        '3 Hari    — Rp 65.000\n' +
+                        '5 Hari    — Rp 95.000\n' +
+                        '7 Hari    — Rp 125.000\n' +
+                        '14 Hari   — Rp 220.000\n' +
+                        '21 Hari   — Rp 300.000\n' +
+                        '30 Hari   — Rp 375.000\n' +
+                        '```',
+                    inline: false
+                },
+                {
+                    name: '🐶 RIDE A PET (Upgrade Hatch Luck)',
+                    value:
+                        '```\n' +
+                        '6 Jam     — Rp 5.000\n' +
+                        '12 Jam    — Rp 8.000\n' +
+                        '1 Hari    — Rp 12.000\n' +
+                        '2 Hari    — Rp 20.000\n' +
+                        '3 Hari    — Rp 30.000\n' +
+                        '5 Hari    — Rp 42.000\n' +
+                        '7 Hari    — Rp 55.000\n' +
+                        '14 Hari   — Rp 100.000\n' +
+                        '21 Hari   — Rp 140.000\n' +
+                        '30 Hari   — Rp 180.000\n' +
+                        '```',
+                    inline: false
+                },
+                {
+                    name: '🥚 RIDE A PET (Upgrade Hatch Luck + Pickup Egg)',
                     value:
                         '```\n' +
                         '6 Jam     — Rp 10.000\n' +
@@ -104,15 +138,19 @@ module.exports = {
             .setTimestamp();
 
         const orderEmbed = new EmbedBuilder()
-            .setTitle('🎮 JOKI AFK ROBLOX & GROW A CHICKEN FIGHTER')
+            .setTitle('🎮 JOKI AFK ROBLOX & GROW A CHICKEN FIGHTER & RIDE A PET')
             .setColor('#2F3136')
             .setDescription(
-                'Pilih jenis joki yang kamu inginkan:\n\n' +
+                'Pilih jenis joki yang kamu inginkan melalui menu dropdown di bawah:\n\n' +
                 '**🏃 TREADMILL ONLY**\n' +
                 '> AFK treadmill untuk meningkatkan speed\n\n' +
                 '**🥚 TREADMILL + STEAL EGG**\n' +
                 '> AFK treadmill + Steal an Egg\n' +
                 '> *bebas request egg yang ingin diambil*\n\n' +
+                '**🐶 RIDE A PET (Upgrade Hatch Luck)**\n' +
+                '> AFK Ride a Pet untuk Upgrade Hatch Luck\n\n' +
+                '**🥚 RIDE A PET (Upgrade Hatch Luck + Pickup Egg)**\n' +
+                '> AFK Ride a Pet + Pickup Egg\n\n' +
                 '**🔒 PRIVATE SERVER RENTAL**\n' +
                 '> Sewa private server untuk AFK\n\n' +
                 '**🔄 REBIRTH (Grow a Chicken Fighter)**\n' +
@@ -135,34 +173,55 @@ module.exports = {
             .setFooter({ text: 'SysHub Joki Service' })
             .setTimestamp();
 
-        const row = new ActionRowBuilder()
-            .addComponents(
-                new ButtonBuilder()
-                    .setCustomId('joki_treadmill')
-                    .setLabel('Treadmill Only')
-                    .setEmoji('🏃')
-                    .setStyle(ButtonStyle.Primary),
-                new ButtonBuilder()
-                    .setCustomId('joki_treadmill_egg')
-                    .setLabel('Treadmill + Steal Egg')
-                    .setEmoji('🥚')
-                    .setStyle(ButtonStyle.Success),
-                new ButtonBuilder()
-                    .setCustomId('joki_private_server')
-                    .setLabel('Private Server')
-                    .setEmoji('🔒')
-                    .setStyle(ButtonStyle.Primary),
-                new ButtonBuilder()
-                    .setCustomId('joki_rebirth')
-                    .setLabel('Rebirth')
-                    .setEmoji('🔄')
-                    .setStyle(ButtonStyle.Secondary),
-                new ButtonBuilder()
-                    .setCustomId('joki_main_akun')
-                    .setLabel('Main Akun')
-                    .setEmoji('🎮')
-                    .setStyle(ButtonStyle.Danger),
-            );
+        const selectMenu = new StringSelectMenuBuilder()
+            .setCustomId('joki_select_service')
+            .setPlaceholder('👇 Pilih jenis joki yang kamu inginkan...')
+            .addOptions([
+                {
+                    label: 'Treadmill Only',
+                    value: 'joki_treadmill',
+                    description: 'AFK treadmill untuk meningkatkan speed',
+                    emoji: '🏃',
+                },
+                {
+                    label: 'Treadmill + Steal Egg',
+                    value: 'joki_treadmill_egg',
+                    description: 'AFK treadmill + Steal an Egg',
+                    emoji: '🥚',
+                },
+                {
+                    label: 'Ride a Pet - Upgrade Hatch Luck',
+                    value: 'joki_rideapet_luck',
+                    description: 'AFK Ride a Pet - Upgrade Hatch Luck',
+                    emoji: '🐶',
+                },
+                {
+                    label: 'Ride a Pet - Hatch Luck + Pickup Egg',
+                    value: 'joki_rideapet_luck_egg',
+                    description: 'AFK Ride a Pet - Upgrade Hatch Luck + Pickup Egg',
+                    emoji: '🥚',
+                },
+                {
+                    label: 'Private Server Rental',
+                    value: 'joki_private_server',
+                    description: 'Sewa private server untuk AFK',
+                    emoji: '🔒',
+                },
+                {
+                    label: 'Rebirth (Grow a Chicken Fighter)',
+                    value: 'joki_rebirth',
+                    description: 'Joki rebirth sesuai jumlah yang diinginkan',
+                    emoji: '🔄',
+                },
+                {
+                    label: 'Main Akun (Grow a Chicken Fighter)',
+                    value: 'joki_main_akun',
+                    description: 'Mainin akun bebas request',
+                    emoji: '🎮',
+                },
+            ]);
+
+        const row = new ActionRowBuilder().addComponents(selectMenu);
 
         await pricelistChannel.send({ embeds: [pricelistEmbed] });
         await orderChannel.send({ embeds: [orderEmbed], components: [row] });

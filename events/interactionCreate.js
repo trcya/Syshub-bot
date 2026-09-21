@@ -391,30 +391,9 @@ module.exports = {
 
             // === JOKI TICKET HANDLERS ===
 
-            // 5. JOKI TREADMILL / TREADMILL+EGG / PRIVATE SERVER / REBIRTH / MAIN AKUN BUTTON - Create ticket
-            if (customId === 'joki_treadmill' || customId === 'joki_treadmill_egg' || customId === 'joki_private_server' || customId === 'joki_rebirth' || customId === 'joki_main_akun') {
-                const isEgg = customId === 'joki_treadmill_egg';
-                const isPrivateServer = customId === 'joki_private_server';
-                const isRebirth = customId === 'joki_rebirth';
-                const isMainAkun = customId === 'joki_main_akun';
-                let serviceType, serviceEmoji;
-
-                if (isMainAkun) {
-                    serviceType = 'Main Akun (Grow a Chicken Fighter)';
-                    serviceEmoji = '🎮';
-                } else if (isRebirth) {
-                    serviceType = 'Rebirth';
-                    serviceEmoji = '🔄';
-                } else if (isPrivateServer) {
-                    serviceType = 'Private Server Rental';
-                    serviceEmoji = '🔒';
-                } else if (isEgg) {
-                    serviceType = 'Treadmill + Steal Egg';
-                    serviceEmoji = '🥚';
-                } else {
-                    serviceType = 'Treadmill Only';
-                    serviceEmoji = '🏃';
-                }
+            // 5. JOKI SELECT MENU - SHOW WARNING MODAL FORM
+            if (interaction.isStringSelectMenu() && customId === 'joki_select_service') {
+                const selectedService = interaction.values[0];
 
                 const ticketName = `joki-${user.username}`;
                 const existingTicket = guild.channels.cache.find(c => c.name === ticketName.toLowerCase());
@@ -422,150 +401,21 @@ module.exports = {
                     return interaction.reply({ content: `You already have an open ticket: ${existingTicket}`, ephemeral: true });
                 }
 
-                await interaction.deferReply({ ephemeral: true });
+                const modal = new ModalBuilder()
+                    .setCustomId(`joki_confirm_modal:${selectedService}`)
+                    .setTitle('⚠️ PERINGATAN HARGA JOKI');
 
-                try {
-                    const permissionOverwrites = [
-                        { id: guild.id, deny: [PermissionFlagsBits.ViewChannel] },
-                        { id: user.id, allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages, PermissionFlagsBits.AttachFiles] },
-                        { id: staffId, allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages] },
-                        { id: JOKI_ROLE_ID, allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages, PermissionFlagsBits.AttachFiles] },
-                    ];
+                const warningInput = new TextInputBuilder()
+                    .setCustomId('joki_warning_ack')
+                    .setLabel('PERINGATAN SEBELUM MEMBUAT TICKET')
+                    .setStyle(TextInputStyle.Paragraph)
+                    .setValue('Tolong untuk mengecek harga terlebih dahulu! Jika hanya membuka ticket iseng, kamu akan terkena TIME OUT 3 HARI jika tidak melakukan pemilihan durasi. Tolong baca harga dengan baik.')
+                    .setRequired(true);
 
-                    const ticketChannel = await guild.channels.create({
-                        name: ticketName,
-                        type: ChannelType.GuildText,
-                        parent: JOKI_CATEGORY_ID,
-                        permissionOverwrites,
-                    });
+                const firstRow = new ActionRowBuilder().addComponents(warningInput);
+                modal.addComponents(firstRow);
 
-                    const preEmbed = new EmbedBuilder()
-                        .setTitle(`${serviceEmoji} Joki ${serviceType}`)
-                        .setColor('#5865F2')
-                        .setDescription(`Welcome ${user}!\nStaff akan segera membantu kamu.\n\nPilih durasi yang kamu inginkan:\n\n⚠️ **Jika tidak memilih durasi dalam 6 jam, kamu akan di-timeout selama 3 hari dan ticket akan ditutup!**${isMainAkun ? '\n\n✅ Auto Rebirth\n✅ Auto UFO (bebas request ayam yang mau di naikin)\n✅ Auto Event (kalo ada event khusus)' : ''}`)
-                        .setFooter({ text: 'SysHub Joki Service' })
-                        .setTimestamp();
-
-                    const tBtns1 = [
-                        { id: 'joki_dur_6j',  label: '6 Jam — 5K' },
-                        { id: 'joki_dur_12j', label: '12 Jam — 8K' },
-                        { id: 'joki_dur_1h',  label: '1 Hari — 12K' },
-                        { id: 'joki_dur_2h',  label: '2 Hari — 20K' },
-                        { id: 'joki_dur_3h',  label: '3 Hari — 30K' },
-                    ];
-                    const tBtns2 = [
-                        { id: 'joki_dur_5h',  label: '5 Hari — 42K' },
-                        { id: 'joki_dur_7h',  label: '7 Hari — 55K' },
-                        { id: 'joki_dur_14h', label: '14 Hari — 100K' },
-                        { id: 'joki_dur_21h', label: '21 Hari — 140K' },
-                        { id: 'joki_dur_30h', label: '30 Hari — 180K' },
-                    ];
-                    const eBtns1 = [
-                        { id: 'joki_dur_egg_6j',  label: '6 Jam — 10K' },
-                        { id: 'joki_dur_egg_12j', label: '12 Jam — 16K' },
-                        { id: 'joki_dur_egg_1h',  label: '1 Hari — 25K' },
-                        { id: 'joki_dur_egg_2h',  label: '2 Hari — 45K' },
-                        { id: 'joki_dur_egg_3h',  label: '3 Hari — 65K' },
-                    ];
-                    const eBtns2 = [
-                        { id: 'joki_dur_egg_5h',  label: '5 Hari — 95K' },
-                        { id: 'joki_dur_egg_7h',  label: '7 Hari — 125K' },
-                        { id: 'joki_dur_egg_14h', label: '14 Hari — 220K' },
-                        { id: 'joki_dur_egg_21h', label: '21 Hari — 300K' },
-                        { id: 'joki_dur_egg_30h', label: '30 Hari — 375K' },
-                    ];
-                    const psBtns1 = [
-                        { id: 'joki_dur_ps_3j',  label: '3 Jam — 5K' },
-                        { id: 'joki_dur_ps_6j',  label: '6 Jam — 9K' },
-                        { id: 'joki_dur_ps_12j', label: '12 Jam — 15K' },
-                    ];
-                    const psBtns2 = [
-                        { id: 'joki_dur_ps_1h',  label: '1 Hari — 25K' },
-                        { id: 'joki_dur_ps_3h',  label: '3 Hari — 60K' },
-                        { id: 'joki_dur_ps_7h',  label: '7 Hari — 120K' },
-                    ];
-                    const rBtns1 = [
-                        { id: 'joki_dur_r1',   label: '1 Rebirth — 1K' },
-                        { id: 'joki_dur_r50',  label: '50 Rebirth — 30K' },
-                    ];
-                    const rBtns2 = [
-                        { id: 'joki_dur_r100', label: '100 Rebirth — 45K' },
-                        { id: 'joki_dur_r500', label: '500 Rebirth — 200K' },
-                    ];
-                    const mBtns1 = [
-                        { id: 'joki_dur_main_1j',  label: '1 Jam — 20K' },
-                        { id: 'joki_dur_main_5j',  label: '5 Jam — 80K' },
-                        { id: 'joki_dur_main_10j', label: '10 Jam — 150K' },
-                    ];
-
-                    const rows = [];
-                    if (isMainAkun) {
-                        rows.push(
-                            new ActionRowBuilder().addComponents(mBtns1.map(b => new ButtonBuilder().setCustomId(b.id).setLabel(b.label).setStyle(ButtonStyle.Danger))),
-                        );
-                    } else if (isRebirth) {
-                        rows.push(
-                            new ActionRowBuilder().addComponents(rBtns1.map(b => new ButtonBuilder().setCustomId(b.id).setLabel(b.label).setStyle(ButtonStyle.Secondary))),
-                            new ActionRowBuilder().addComponents(rBtns2.map(b => new ButtonBuilder().setCustomId(b.id).setLabel(b.label).setStyle(ButtonStyle.Secondary))),
-                        );
-                    } else if (isPrivateServer) {
-                        rows.push(
-                            new ActionRowBuilder().addComponents(psBtns1.map(b => new ButtonBuilder().setCustomId(b.id).setLabel(b.label).setStyle(ButtonStyle.Primary))),
-                            new ActionRowBuilder().addComponents(psBtns2.map(b => new ButtonBuilder().setCustomId(b.id).setLabel(b.label).setStyle(ButtonStyle.Primary))),
-                        );
-                    } else {
-                        const btns = isEgg ? [eBtns1, eBtns2] : [tBtns1, tBtns2];
-                        rows.push(
-                            ...btns.map(pair => new ActionRowBuilder().addComponents(
-                                pair.map(b => new ButtonBuilder().setCustomId(b.id).setLabel(b.label).setStyle(isEgg ? ButtonStyle.Success : ButtonStyle.Primary))
-                            ))
-                        );
-                    }
-
-                    const closeRow = new ActionRowBuilder().addComponents(
-                        new ButtonBuilder().setCustomId('close_joki_ticket').setLabel('Close Ticket').setStyle(ButtonStyle.Danger).setEmoji('✖️'),
-                    );
-                    rows.push(closeRow);
-
-                    await ticketChannel.send({ content: `${user} | <@&${JOKI_ROLE_ID}>`, embeds: [preEmbed], components: rows });
-                    await interaction.editReply({ content: `Ticket created: ${ticketChannel}` });
-
-                    const timeoutKey = ticketChannel.id;
-                    const timeoutMs = 6 * 60 * 60 * 1000;
-                    const timeoutDuration = 3 * 24 * 60 * 60 * 1000;
-
-                    const timeoutId = setTimeout(async () => {
-                        jokiTimeouts.delete(timeoutKey);
-                        try {
-                            const memberToTimeout = await guild.members.fetch(user.id);
-                            await memberToTimeout.timeout(timeoutDuration, 'Tidak memilih durasi joki dalam 6 jam');
-                            await ticketChannel.send(`⚠️ ${user} telah di-timeout selama 3 hari karena tidak memilih durasi dalam 6 jam.`);
-                            await ticketChannel.send(`🔒 Ticket akan ditutup dalam 5 detik...`);
-                            setTimeout(() => ticketChannel.delete(), 5000);
-                        } catch (err) {
-                            console.error('Failed to timeout user:', err);
-                        }
-                    }, timeoutMs);
-
-                    jokiTimeouts.set(timeoutKey, timeoutId);
-
-                    const jokiLogChannel = guild.channels.cache.get(JOKI_TICKET_LOG_CHANNEL);
-                    if (jokiLogChannel) {
-                        const logEmbed = new EmbedBuilder()
-                            .setTitle('🎫 Joki Ticket Opened')
-                            .setColor('#57F287')
-                            .addFields(
-                                { name: 'User', value: `${user} (${user.id})`, inline: true },
-                                { name: 'Channel', value: ticketChannel.name, inline: true },
-                                { name: 'Layanan', value: serviceType, inline: true },
-                            )
-                            .setTimestamp();
-                        jokiLogChannel.send({ embeds: [logEmbed] });
-                    }
-                } catch (error) {
-                    console.error('Failed to create joki ticket:', error);
-                    await interaction.editReply({ content: 'Failed to create ticket channel. Please contact an administrator.' });
-                }
+                return interaction.showModal(modal);
             }
 
             // 6. JOKI DURATION BUTTON - Update ticket with selected duration
@@ -640,12 +490,14 @@ module.exports = {
                 }
 
                 const oldEmbed = interaction.message.embeds[0];
+                const displayServiceType = oldEmbed?.title || serviceType;
+
                 const embed = new EmbedBuilder()
                     .setTitle(oldEmbed?.title || '🤖 Joki Ticket')
                     .setColor(color)
                     .setDescription(`Welcome ${user}!\nStaff akan segera membantu kamu.`)
                     .addFields(
-                        { name: '📋 Layanan', value: serviceType, inline: true },
+                        { name: '📋 Layanan', value: displayServiceType, inline: true },
                         { name: '⏱️ Durasi', value: `**${opt.label}**`, inline: true },
                         { name: '💰 Total Harga', value: `**${formatPrice(opt.price)}**`, inline: true },
                     )
@@ -938,6 +790,193 @@ module.exports = {
             const { customId, guild, user, channel, member } = interaction;
             const logChannel = guild.channels.cache.get(process.env.TICKET_LOG_CHANNEL_ID);
             const staffId = process.env.MIDMAN_STAFF_ID;
+
+            // JOKI CONFIRM MODAL SUBMIT
+            if (customId.startsWith('joki_confirm_modal:')) {
+                const serviceId = customId.split(':')[1];
+                const isEgg = serviceId === 'joki_treadmill_egg' || serviceId === 'joki_rideapet_luck_egg';
+                const isPrivateServer = serviceId === 'joki_private_server';
+                const isRebirth = serviceId === 'joki_rebirth';
+                const isMainAkun = serviceId === 'joki_main_akun';
+                const isRideapetLuck = serviceId === 'joki_rideapet_luck';
+                const isRideapetEgg = serviceId === 'joki_rideapet_luck_egg';
+
+                let serviceType, serviceEmoji;
+
+                if (isMainAkun) {
+                    serviceType = 'Main Akun (Grow a Chicken Fighter)';
+                    serviceEmoji = '🎮';
+                } else if (isRebirth) {
+                    serviceType = 'Rebirth';
+                    serviceEmoji = '🔄';
+                } else if (isPrivateServer) {
+                    serviceType = 'Private Server Rental';
+                    serviceEmoji = '🔒';
+                } else if (isRideapetEgg) {
+                    serviceType = 'Ride a Pet - Hatch Luck + Pickup Egg';
+                    serviceEmoji = '🥚';
+                } else if (isRideapetLuck) {
+                    serviceType = 'Ride a Pet - Upgrade Hatch Luck';
+                    serviceEmoji = '🐶';
+                } else if (isEgg) {
+                    serviceType = 'Treadmill + Steal Egg';
+                    serviceEmoji = '🥚';
+                } else {
+                    serviceType = 'Treadmill Only';
+                    serviceEmoji = '🏃';
+                }
+
+                const ticketName = `joki-${user.username}`;
+                const existingTicket = guild.channels.cache.find(c => c.name === ticketName.toLowerCase());
+                if (existingTicket) {
+                    return interaction.reply({ content: `You already have an open ticket: ${existingTicket}`, ephemeral: true });
+                }
+
+                await interaction.deferReply({ ephemeral: true });
+
+                try {
+                    const permissionOverwrites = [
+                        { id: guild.id, deny: [PermissionFlagsBits.ViewChannel] },
+                        { id: user.id, allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages, PermissionFlagsBits.AttachFiles] },
+                        { id: staffId, allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages] },
+                        { id: JOKI_ROLE_ID, allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages, PermissionFlagsBits.AttachFiles] },
+                    ];
+
+                    const ticketChannel = await guild.channels.create({
+                        name: ticketName,
+                        type: ChannelType.GuildText,
+                        parent: JOKI_CATEGORY_ID,
+                        permissionOverwrites,
+                    });
+
+                    const preEmbed = new EmbedBuilder()
+                        .setTitle(`${serviceEmoji} Joki ${serviceType}`)
+                        .setColor('#5865F2')
+                        .setDescription(`Welcome ${user}!\nStaff akan segera membantu kamu.\n\nPilih durasi yang kamu inginkan:\n\n⚠️ **PERINGATAN: Tolong untuk mengecek harga terlebih dahulu! Jika hanya membuka ticket iseng, kamu akan terkena TIME OUT 3 HARI jika tidak melakukan pemilihan durasi dalam 6 jam! Tolong baca harga dengan baik.**${isMainAkun ? '\n\n✅ Auto Rebirth\n✅ Auto UFO (bebas request ayam yang mau di naikin)\n✅ Auto Event (kalo ada event khusus)' : ''}`)
+                        .setFooter({ text: 'SysHub Joki Service' })
+                        .setTimestamp();
+
+                    const tBtns1 = [
+                        { id: 'joki_dur_6j',  label: '6 Jam — 5K' },
+                        { id: 'joki_dur_12j', label: '12 Jam — 8K' },
+                        { id: 'joki_dur_1h',  label: '1 Hari — 12K' },
+                        { id: 'joki_dur_2h',  label: '2 Hari — 20K' },
+                        { id: 'joki_dur_3h',  label: '3 Hari — 30K' },
+                    ];
+                    const tBtns2 = [
+                        { id: 'joki_dur_5h',  label: '5 Hari — 42K' },
+                        { id: 'joki_dur_7h',  label: '7 Hari — 55K' },
+                        { id: 'joki_dur_14h', label: '14 Hari — 100K' },
+                        { id: 'joki_dur_21h', label: '21 Hari — 140K' },
+                        { id: 'joki_dur_30h', label: '30 Hari — 180K' },
+                    ];
+                    const eBtns1 = [
+                        { id: 'joki_dur_egg_6j',  label: '6 Jam — 10K' },
+                        { id: 'joki_dur_egg_12j', label: '12 Jam — 16K' },
+                        { id: 'joki_dur_egg_1h',  label: '1 Hari — 25K' },
+                        { id: 'joki_dur_egg_2h',  label: '2 Hari — 45K' },
+                        { id: 'joki_dur_egg_3h',  label: '3 Hari — 65K' },
+                    ];
+                    const eBtns2 = [
+                        { id: 'joki_dur_egg_5h',  label: '5 Hari — 95K' },
+                        { id: 'joki_dur_egg_7h',  label: '7 Hari — 125K' },
+                        { id: 'joki_dur_egg_14h', label: '14 Hari — 220K' },
+                        { id: 'joki_dur_egg_21h', label: '21 Hari — 300K' },
+                        { id: 'joki_dur_egg_30h', label: '30 Hari — 375K' },
+                    ];
+                    const psBtns1 = [
+                        { id: 'joki_dur_ps_3j',  label: '3 Jam — 5K' },
+                        { id: 'joki_dur_ps_6j',  label: '6 Jam — 9K' },
+                        { id: 'joki_dur_ps_12j', label: '12 Jam — 15K' },
+                    ];
+                    const psBtns2 = [
+                        { id: 'joki_dur_ps_1h',  label: '1 Hari — 25K' },
+                        { id: 'joki_dur_ps_3h',  label: '3 Hari — 60K' },
+                        { id: 'joki_dur_ps_7h',  label: '7 Hari — 120K' },
+                    ];
+                    const rBtns1 = [
+                        { id: 'joki_dur_r1',   label: '1 Rebirth — 1K' },
+                        { id: 'joki_dur_r50',  label: '50 Rebirth — 30K' },
+                    ];
+                    const rBtns2 = [
+                        { id: 'joki_dur_r100', label: '100 Rebirth — 45K' },
+                        { id: 'joki_dur_r500', label: '500 Rebirth — 200K' },
+                    ];
+                    const mBtns1 = [
+                        { id: 'joki_dur_main_1j',  label: '1 Jam — 20K' },
+                        { id: 'joki_dur_main_5j',  label: '5 Jam — 80K' },
+                        { id: 'joki_dur_main_10j', label: '10 Jam — 150K' },
+                    ];
+
+                    const rows = [];
+                    if (isMainAkun) {
+                        rows.push(
+                            new ActionRowBuilder().addComponents(mBtns1.map(b => new ButtonBuilder().setCustomId(b.id).setLabel(b.label).setStyle(ButtonStyle.Danger))),
+                        );
+                    } else if (isRebirth) {
+                        rows.push(
+                            new ActionRowBuilder().addComponents(rBtns1.map(b => new ButtonBuilder().setCustomId(b.id).setLabel(b.label).setStyle(ButtonStyle.Secondary))),
+                            new ActionRowBuilder().addComponents(rBtns2.map(b => new ButtonBuilder().setCustomId(b.id).setLabel(b.label).setStyle(ButtonStyle.Secondary))),
+                        );
+                    } else if (isPrivateServer) {
+                        rows.push(
+                            new ActionRowBuilder().addComponents(psBtns1.map(b => new ButtonBuilder().setCustomId(b.id).setLabel(b.label).setStyle(ButtonStyle.Primary))),
+                            new ActionRowBuilder().addComponents(psBtns2.map(b => new ButtonBuilder().setCustomId(b.id).setLabel(b.label).setStyle(ButtonStyle.Primary))),
+                        );
+                    } else {
+                        const btns = isEgg ? [eBtns1, eBtns2] : [tBtns1, tBtns2];
+                        rows.push(
+                            ...btns.map(pair => new ActionRowBuilder().addComponents(
+                                pair.map(b => new ButtonBuilder().setCustomId(b.id).setLabel(b.label).setStyle(isEgg ? ButtonStyle.Success : ButtonStyle.Primary))
+                            ))
+                        );
+                    }
+
+                    const closeRow = new ActionRowBuilder().addComponents(
+                        new ButtonBuilder().setCustomId('close_joki_ticket').setLabel('Close Ticket').setStyle(ButtonStyle.Danger).setEmoji('✖️'),
+                    );
+                    rows.push(closeRow);
+
+                    await ticketChannel.send({ content: `${user} | <@&${JOKI_ROLE_ID}>`, embeds: [preEmbed], components: rows });
+                    await interaction.editReply({ content: `Ticket created: ${ticketChannel}` });
+
+                    const timeoutKey = ticketChannel.id;
+                    const timeoutMs = 6 * 60 * 60 * 1000;
+                    const timeoutDuration = 3 * 24 * 60 * 60 * 1000;
+
+                    const timeoutId = setTimeout(async () => {
+                        jokiTimeouts.delete(timeoutKey);
+                        try {
+                            const memberToTimeout = await guild.members.fetch(user.id);
+                            await memberToTimeout.timeout(timeoutDuration, 'Tidak memilih durasi joki dalam 6 jam');
+                            await ticketChannel.send(`⚠️ ${user} telah di-timeout selama 3 hari karena tidak memilih durasi dalam 6 jam.`);
+                            await ticketChannel.send(`🔒 Ticket akan ditutup dalam 5 detik...`);
+                            setTimeout(() => ticketChannel.delete(), 5000);
+                        } catch (err) {
+                            console.error('Failed to timeout user:', err);
+                        }
+                    }, timeoutMs);
+
+                    jokiTimeouts.set(timeoutKey, timeoutId);
+
+                    const jokiLogChannel = guild.channels.cache.get(JOKI_TICKET_LOG_CHANNEL);
+                    if (jokiLogChannel) {
+                        const logEmbed = new EmbedBuilder()
+                            .setTitle('🎫 Joki Ticket Opened')
+                            .setColor('#57F287')
+                            .addFields(
+                                { name: 'User', value: `${user} (${user.id})`, inline: true },
+                                { name: 'Channel', value: ticketChannel.name, inline: true },
+                                { name: 'Layanan', value: serviceType, inline: true },
+                            )
+                            .setTimestamp();
+                        jokiLogChannel.send({ embeds: [logEmbed] });
+                    }
+                } catch (error) {
+                    console.error('Failed to create joki ticket:', error);
+                    await interaction.editReply({ content: 'Failed to create ticket channel. Please contact an administrator.' });
+                }
+            }
 
             if (customId === 'midman_modal') {
                 const jenisMidman = interaction.fields.getTextInputValue('jenis_midman');
