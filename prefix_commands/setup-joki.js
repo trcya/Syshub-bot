@@ -71,7 +71,7 @@ module.exports = {
                     inline: false
                 },
                 {
-                    name: '🥚 RIDE A PET (Auto Event Steal an Egg)',
+                    name: '🥚 AUTO EVENT STEAL AN EGG',
                     value:
                         '```\n' +
                         '6 Jam     — Rp 10.000\n' +
@@ -149,8 +149,8 @@ module.exports = {
                 '> *bebas request egg yang ingin diambil*\n\n' +
                 '**🐶 RIDE A PET (Up Hatch Luck + Pick Up Egg)**\n' +
                 '> AFK Ride a Pet - Up Hatch Luck + Pick Up Egg\n\n' +
-                '**🥚 RIDE A PET (Auto Event Steal an Egg)**\n' +
-                '> AFK Ride a Pet - Auto Event Steal an Egg\n\n' +
+                '**🥚 AUTO EVENT STEAL AN EGG**\n' +
+                '> AFK Auto Event Steal an Egg\n\n' +
                 '**🔒 PRIVATE SERVER RENTAL**\n' +
                 '> Sewa private server untuk AFK\n\n' +
                 '**🔄 REBIRTH (Grow a Chicken Fighter)**\n' +
@@ -196,9 +196,9 @@ module.exports = {
                     emoji: '🐶',
                 },
                 {
-                    label: 'Ride a Pet - Auto Event Steal an Egg',
+                    label: 'Auto Event Steal an Egg',
                     value: 'joki_rideapet_luck_egg',
-                    description: 'AFK Ride a Pet - Auto Event Steal an Egg',
+                    description: 'AFK Auto Event Steal an Egg',
                     emoji: '🥚',
                 },
                 {

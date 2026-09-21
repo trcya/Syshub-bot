@@ -817,7 +817,7 @@ module.exports = {
                     serviceType = 'Private Server Rental';
                     serviceEmoji = '🔒';
                 } else if (isRideapetEgg) {
-                    serviceType = 'Ride a Pet - Auto Event Steal an Egg';
+                    serviceType = 'Auto Event Steal an Egg';
                     serviceEmoji = '🥚';
                 } else if (isRideapetLuck) {
                     serviceType = 'Ride a Pet - Up Hatch Luck + Pick Up Egg';
