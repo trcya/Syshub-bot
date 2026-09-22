@@ -443,30 +443,18 @@ module.exports = {
                 const isPrivateServer = customId.includes('ps');
                 const isRebirth = customId.startsWith('joki_dur_r');
                 const isMainAkun = customId.startsWith('joki_dur_main');
-                let serviceType, color;
-
-                if (isMainAkun) {
-                    serviceType = '🎮 Main Akun (Grow a Chicken Fighter)';
-                    color = '#ED4245';
-                } else if (isRebirth) {
-                    serviceType = '🔄 Rebirth';
-                    color = '#FFD700';
-                } else if (isPrivateServer) {
-                    serviceType = '🔒 Private Server Rental';
-                    color = '#5865F2';
-                } else if (isEgg) {
-                    serviceType = '🥚 Treadmill + Steal Egg';
-                    color = '#57F287';
-                } else {
-                    serviceType = '🏃 Treadmill Only';
-                    color = '#5865F2';
-                }
 
                 const oldEmbed = interaction.message.embeds[0];
-                const displayServiceType = oldEmbed?.title || serviceType;
+                const displayServiceType = oldEmbed?.title ? oldEmbed.title.replace(/^[\p{Emoji}\u200d]+\s*/u, '') : 'Joki Service';
+                const serviceType = oldEmbed?.title || '🤖 Joki Ticket';
+
+                let color = '#5865F2';
+                if (isMainAkun) color = '#ED4245';
+                else if (isRebirth) color = '#FFD700';
+                else if (isEgg) color = '#57F287';
 
                 const embed = new EmbedBuilder()
-                    .setTitle(oldEmbed?.title || '🤖 Joki Ticket')
+                    .setTitle(serviceType)
                     .setColor(color)
                     .setDescription(`Welcome ${user}!\nStaff akan segera membantu kamu.`)
                     .addFields(
@@ -484,7 +472,7 @@ module.exports = {
 
                 await interaction.update({ embeds: [embed], components: [row] });
 
-                await channel.send(`${user} memilih **${serviceType}** durasi **${opt.label}** — **${formatPrice(opt.price)}**`);
+                await channel.send(`${user} memilih **${displayServiceType}** durasi **${opt.label}** — **${formatPrice(opt.price)}**`);
 
                 // Create Pakasir payment transaction
                 const orderId = `JOKI-${channel.id}-${Date.now()}`;
