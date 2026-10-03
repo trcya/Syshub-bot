@@ -26,6 +26,16 @@
             "note": "Discontinue"
         },
         {
+            "name": "grow a chicken fighter",
+            "status": "discontinue",
+            "note": "Discontinue"
+        },
+        {
+            "name": "Jump for Animal",
+            "status": "discontinue",
+            "note": "Discontinue"
+        },
+        {
             "name": "Mine a Mountain",
             "status": "ready"
         },
@@ -38,19 +48,11 @@
             "status": "ready"
         },
         {
-            "name": "Jump for Animal",
-            "status": "ready"
-        },
-        {
             "name": "Ride A Pet",
             "status": "ready"
         },
         {
             "name": "+1 Loot To Forge",
-            "status": "ready"
-        },
-        {
-            "name": "Grow a chicken fighter",
             "status": "ready"
         }
     ]
