@@ -10,6 +10,8 @@ const GAME_STATUS_CHANNEL_ID = process.env.GAME_STATUS_CHANNEL_ID;
 const STATUS_ICONS = {
     ready: '🟢',
     waiting: '🟡',
+    unupdate: '🟣',
+    no_update: '🟣',
     outdate: '🔴',
     discontinue: '🔴'
 };
@@ -63,7 +65,7 @@ function buildGameStatusEmbed() {
         fields: [
             {
                 name: 'STATUS LEGEND',
-                value: `${STATUS_ICONS.ready} : Ready to Use\n${STATUS_ICONS.waiting} : Waiting Update\n${STATUS_ICONS.outdate} : Outdate`
+                value: `${STATUS_ICONS.ready} : Ready to Use\n${STATUS_ICONS.waiting} : Waiting Update\n${STATUS_ICONS.unupdate} : Usable (No Update)\n${STATUS_ICONS.outdate} : Outdate`
             },
             {
                 name: '\u200b',
