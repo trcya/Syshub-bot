@@ -26,13 +26,13 @@
             "note": "Discontinue"
         },
         {
-            "name": "grow a chicken fighter",
-            "status": "unupdate"
-        },
-        {
             "name": "Jump for Animal",
             "status": "discontinue",
             "note": "Discontinue"
+        },
+        {
+            "name": "grow a chicken fighter",
+            "status": "unupdate"
         },
         {
             "name": "Mine a Mountain",
