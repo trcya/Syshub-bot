@@ -12,6 +12,8 @@ const STATUS_ICONS = {
     waiting: '🟡',
     unupdate: '🟣',
     no_update: '🟣',
+    coming_soon: '🟠',
+    comingsoon: '🟠',
     outdate: '🔴',
     discontinue: '🔴'
 };
@@ -65,7 +67,7 @@ function buildGameStatusEmbed() {
         fields: [
             {
                 name: 'STATUS LEGEND',
-                value: `${STATUS_ICONS.ready} : Ready to Use\n${STATUS_ICONS.waiting} : Waiting Update\n${STATUS_ICONS.unupdate} : Usable (No Update)\n${STATUS_ICONS.outdate} : Outdate`
+                value: `${STATUS_ICONS.ready} : Ready to Use\n${STATUS_ICONS.waiting} : Waiting Update\n${STATUS_ICONS.unupdate} : Usable (No Update)\n${STATUS_ICONS.coming_soon} : Coming Soon\n${STATUS_ICONS.outdate} : Outdate`
             },
             {
                 name: '\u200b',
