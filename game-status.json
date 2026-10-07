@@ -35,15 +35,19 @@
             "status": "coming_soon"
         },
         {
-            "name": "break and steal an egg ",
-            "status": "coming_soon"
-        },
-        {
             "name": "grow a chicken fighter",
             "status": "unupdate"
         },
         {
+            "name": "break and steal an egg ",
+            "status": "coming_soon"
+        },
+        {
             "name": "Mine a Mountain",
+            "status": "unupdate"
+        },
+        {
+            "name": "break and steal an egg ",
             "status": "ready"
         },
         {
