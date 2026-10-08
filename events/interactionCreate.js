@@ -427,6 +427,14 @@ module.exports = {
                     'joki_dur_main_1j':  { label: '1 Jam', price: 20000 },
                     'joki_dur_main_5j':  { label: '5 Jam', price: 80000 },
                     'joki_dur_main_10j': { label: '10 Jam', price: 150000 },
+                    'joki_dur_break_30m': { label: '30 Menit', price: 15000 },
+                    'joki_dur_break_1j':  { label: '1 Jam', price: 25000 },
+                    'joki_dur_break_2j':  { label: '2 Jam', price: 40000 },
+                    'joki_dur_break_3j':  { label: '3 Jam', price: 55000 },
+                    'joki_dur_break_5j':  { label: '5 Jam', price: 80000 },
+                    'joki_dur_afkbreak_1h': { label: '1 Hari', price: 60000 },
+                    'joki_dur_afkbreak_3h': { label: '3 Hari', price: 165000 },
+                    'joki_dur_afkbreak_7h': { label: '7 Hari', price: 350000 },
                 };
 
                 const opt = jokiDurMap[customId];
@@ -786,30 +794,19 @@ module.exports = {
             // JOKI CONFIRM MODAL SUBMIT
             if (customId.startsWith('joki_confirm_modal:')) {
                 const serviceId = customId.split(':')[1];
-                const isEgg = serviceId === 'joki_treadmill_egg' || serviceId === 'joki_rideapet_luck_egg';
-                const isPrivateServer = serviceId === 'joki_private_server';
-                const isRebirth = serviceId === 'joki_rebirth';
-                const isMainAkun = serviceId === 'joki_main_akun';
-                const isRideapetLuck = serviceId === 'joki_rideapet_luck';
-                const isRideapetEgg = serviceId === 'joki_rideapet_luck_egg';
+                const isBreakEgg = serviceId === 'joki_break_egg';
+                const isAfkBreakEgg = serviceId === 'joki_afk_break_egg';
+                const isEgg = serviceId === 'joki_treadmill_egg';
+                const isTreadmill = serviceId === 'joki_treadmill';
 
                 let serviceType, serviceEmoji;
 
-                if (isMainAkun) {
-                    serviceType = 'Main Akun (Grow a Chicken Fighter)';
-                    serviceEmoji = '🎮';
-                } else if (isRebirth) {
-                    serviceType = 'Rebirth';
-                    serviceEmoji = '🔄';
-                } else if (isPrivateServer) {
-                    serviceType = 'Private Server Rental';
-                    serviceEmoji = '🔒';
-                } else if (isRideapetEgg) {
-                    serviceType = 'Auto Event Steal an Egg';
+                if (isBreakEgg) {
+                    serviceType = 'Break & Steal an Egg (Getok Telur)';
                     serviceEmoji = '🥚';
-                } else if (isRideapetLuck) {
-                    serviceType = 'Ride a Pet - Up Hatch Luck + Pick Up Egg';
-                    serviceEmoji = '🐶';
+                } else if (isAfkBreakEgg) {
+                    serviceType = 'AFK Break & Steal an Egg';
+                    serviceEmoji = '🥚';
                 } else if (isEgg) {
                     serviceType = 'Treadmill + Steal Egg';
                     serviceEmoji = '🥚';
@@ -841,10 +838,17 @@ module.exports = {
                         permissionOverwrites,
                     });
 
+                    let noteText = '';
+                    if (isBreakEgg) {
+                        noteText = '\n\n📌 **Note:** Joki getok telur (khusus break egg, pet yang keluar diambil sendiri oleh buyer).';
+                    } else if (isAfkBreakEgg) {
+                        noteText = '\n\n📌 **Note:** Treadmill + Steal Pet 1–10B/s.';
+                    }
+
                     const preEmbed = new EmbedBuilder()
                         .setTitle(`${serviceEmoji} Joki ${serviceType}`)
                         .setColor('#5865F2')
-                        .setDescription(`Welcome ${user}!\nStaff akan segera membantu kamu.\n\nPilih durasi yang kamu inginkan:\n\n⚠️ **PERINGATAN: Tolong untuk mengecek harga terlebih dahulu! Jika hanya membuka ticket iseng, kamu akan terkena TIME OUT 3 HARI jika tidak melakukan pemilihan durasi dalam 6 jam! Tolong baca harga dengan baik.**${isMainAkun ? '\n\n✅ Auto Rebirth\n✅ Auto UFO (bebas request ayam yang mau di naikin)\n✅ Auto Event (kalo ada event khusus)' : ''}`)
+                        .setDescription(`Welcome ${user}!\nStaff akan segera membantu kamu.\n\nPilih durasi yang kamu inginkan:\n\n⚠️ **PERINGATAN: Tolong untuk mengecek harga terlebih dahulu! Jika hanya membuka ticket iseng, kamu akan terkena TIME OUT 3 HARI jika tidak melakukan pemilihan durasi dalam 6 jam! Tolong baca harga dengan baik.**${noteText}`)
                         .setFooter({ text: 'SysHub Joki Service' })
                         .setTimestamp();
 
@@ -876,44 +880,27 @@ module.exports = {
                         { id: 'joki_dur_egg_21h', label: '21 Hari — 300K' },
                         { id: 'joki_dur_egg_30h', label: '30 Hari — 375K' },
                     ];
-                    const psBtns1 = [
-                        { id: 'joki_dur_ps_3j',  label: '3 Jam — 5K' },
-                        { id: 'joki_dur_ps_6j',  label: '6 Jam — 9K' },
-                        { id: 'joki_dur_ps_12j', label: '12 Jam — 15K' },
+                    const breakBtns = [
+                        { id: 'joki_dur_break_30m', label: '30 Menit — 15K' },
+                        { id: 'joki_dur_break_1j',  label: '1 Jam — 25K' },
+                        { id: 'joki_dur_break_2j',  label: '2 Jam — 40K' },
+                        { id: 'joki_dur_break_3j',  label: '3 Jam — 55K' },
+                        { id: 'joki_dur_break_5j',  label: '5 Jam — 80K' },
                     ];
-                    const psBtns2 = [
-                        { id: 'joki_dur_ps_1h',  label: '1 Hari — 25K' },
-                        { id: 'joki_dur_ps_3h',  label: '3 Hari — 60K' },
-                        { id: 'joki_dur_ps_7h',  label: '7 Hari — 120K' },
-                    ];
-                    const rBtns1 = [
-                        { id: 'joki_dur_r1',   label: '1 Rebirth — 1K' },
-                        { id: 'joki_dur_r50',  label: '50 Rebirth — 30K' },
-                    ];
-                    const rBtns2 = [
-                        { id: 'joki_dur_r100', label: '100 Rebirth — 45K' },
-                        { id: 'joki_dur_r500', label: '500 Rebirth — 200K' },
-                    ];
-                    const mBtns1 = [
-                        { id: 'joki_dur_main_1j',  label: '1 Jam — 20K' },
-                        { id: 'joki_dur_main_5j',  label: '5 Jam — 80K' },
-                        { id: 'joki_dur_main_10j', label: '10 Jam — 150K' },
+                    const afkBreakBtns = [
+                        { id: 'joki_dur_afkbreak_1h', label: '1 Hari — 60K' },
+                        { id: 'joki_dur_afkbreak_3h', label: '3 Hari — 165K' },
+                        { id: 'joki_dur_afkbreak_7h', label: '7 Hari — 350K' },
                     ];
 
                     const rows = [];
-                    if (isMainAkun) {
+                    if (isBreakEgg) {
                         rows.push(
-                            new ActionRowBuilder().addComponents(mBtns1.map(b => new ButtonBuilder().setCustomId(b.id).setLabel(b.label).setStyle(ButtonStyle.Danger))),
+                            new ActionRowBuilder().addComponents(breakBtns.map(b => new ButtonBuilder().setCustomId(b.id).setLabel(b.label).setStyle(ButtonStyle.Success))),
                         );
-                    } else if (isRebirth) {
+                    } else if (isAfkBreakEgg) {
                         rows.push(
-                            new ActionRowBuilder().addComponents(rBtns1.map(b => new ButtonBuilder().setCustomId(b.id).setLabel(b.label).setStyle(ButtonStyle.Secondary))),
-                            new ActionRowBuilder().addComponents(rBtns2.map(b => new ButtonBuilder().setCustomId(b.id).setLabel(b.label).setStyle(ButtonStyle.Secondary))),
-                        );
-                    } else if (isPrivateServer) {
-                        rows.push(
-                            new ActionRowBuilder().addComponents(psBtns1.map(b => new ButtonBuilder().setCustomId(b.id).setLabel(b.label).setStyle(ButtonStyle.Primary))),
-                            new ActionRowBuilder().addComponents(psBtns2.map(b => new ButtonBuilder().setCustomId(b.id).setLabel(b.label).setStyle(ButtonStyle.Primary))),
+                            new ActionRowBuilder().addComponents(afkBreakBtns.map(b => new ButtonBuilder().setCustomId(b.id).setLabel(b.label).setStyle(ButtonStyle.Success))),
                         );
                     } else {
                         const btns = isEgg ? [eBtns1, eBtns2] : [tBtns1, tBtns2];

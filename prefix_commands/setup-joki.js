@@ -54,74 +54,28 @@ module.exports = {
                     inline: false
                 },
                 {
-                    name: '🐶 RIDE A PET (Up Hatch Luck + Pick Up Egg)',
+                    name: '🥚 JOKI BREAK & STEAL AN EGG',
                     value:
                         '```\n' +
-                        '6 Jam     — Rp 5.000\n' +
-                        '12 Jam    — Rp 8.000\n' +
-                        '1 Hari    — Rp 12.000\n' +
-                        '2 Hari    — Rp 20.000\n' +
-                        '3 Hari    — Rp 30.000\n' +
-                        '5 Hari    — Rp 42.000\n' +
-                        '7 Hari    — Rp 55.000\n' +
-                        '14 Hari   — Rp 100.000\n' +
-                        '21 Hari   — Rp 140.000\n' +
-                        '30 Hari   — Rp 180.000\n' +
-                        '```',
+                        '30 Menit  — Rp 15.000\n' +
+                        '1 Jam     — Rp 25.000\n' +
+                        '2 Jam     — Rp 40.000\n' +
+                        '3 Jam     — Rp 55.000\n' +
+                        '5 Jam     — Rp 80.000\n' +
+                        '```\n' +
+                        '• *Joki getok telur*\n' +
+                        '• *Khusus break egg. Pet yang keluar diambil sendiri oleh buyer.*',
                     inline: false
                 },
                 {
-                    name: '🥚 AUTO EVENT STEAL AN EGG',
+                    name: '🥚 JOKI AFK BREAK & STEAL AN EGG',
                     value:
                         '```\n' +
-                        '6 Jam     — Rp 10.000\n' +
-                        '12 Jam    — Rp 16.000\n' +
-                        '1 Hari    — Rp 25.000\n' +
-                        '2 Hari    — Rp 45.000\n' +
-                        '3 Hari    — Rp 65.000\n' +
-                        '5 Hari    — Rp 95.000\n' +
-                        '7 Hari    — Rp 125.000\n' +
-                        '14 Hari   — Rp 220.000\n' +
-                        '21 Hari   — Rp 300.000\n' +
-                        '30 Hari   — Rp 375.000\n' +
-                        '```',
-                    inline: false
-                },
-                {
-                    name: '🔒 PRIVATE SERVER RENTAL',
-                    value:
+                        '1 Hari    — Rp 60.000\n' +
+                        '3 Hari    — Rp 165.000\n' +
+                        '7 Hari    — Rp 350.000\n' +
                         '```\n' +
-                        '3 Jam     — Rp 5.000\n' +
-                        '6 Jam     — Rp 9.000\n' +
-                        '12 Jam    — Rp 15.000\n' +
-                        '1 Hari    — Rp 25.000\n' +
-                        '3 Hari    — Rp 60.000\n' +
-                        '7 Hari    — Rp 120.000\n' +
-                        '```',
-                    inline: false
-                },
-                {
-                    name: '🔄 REBIRTH (Grow a Chicken Fighter)',
-                    value:
-                        '```\n' +
-                        '1 Rebirth   — Rp 1.000\n' +
-                        '50 Rebirth  — Rp 30.000\n' +
-                        '100 Rebirth — Rp 45.000\n' +
-                        '500 Rebirth — Rp 200.000\n' +
-                        '```',
-                    inline: false
-                },
-                {
-                    name: '🎮 MAIN AKUN / AFK (Grow a Chicken Fighter)',
-                    value:
-                        '```\n' +
-                        '1 Jam    — Rp 20.000\n' +
-                        '5 Jam    — Rp 80.000\n' +
-                        '10 Jam   — Rp 150.000\n' +
-                        '```\n' +
-                        '✅ Auto Rebirth\n' +
-                        '✅ Auto UFO (bebas request ayam yang mau di naikin)\n' +
-                        '✅ Auto Event (kalo ada event khusus)',
+                        '• *Treadmill + Steal Pet 1–10B/s*',
                     inline: false
                 },
                 {
@@ -138,7 +92,7 @@ module.exports = {
             .setTimestamp();
 
         const orderEmbed = new EmbedBuilder()
-            .setTitle('🎮 JOKI AFK ROBLOX & GROW A CHICKEN FIGHTER & RIDE A PET')
+            .setTitle('🎮 JOKI AFK ROBLOX & BREAK & STEAL AN EGG')
             .setColor('#2F3136')
             .setDescription(
                 'Pilih jenis joki yang kamu inginkan melalui menu dropdown di bawah:\n\n' +
@@ -147,16 +101,10 @@ module.exports = {
                 '**🥚 TREADMILL + STEAL EGG**\n' +
                 '> AFK treadmill + Steal an Egg\n' +
                 '> *bebas request egg yang ingin diambil*\n\n' +
-                '**🐶 RIDE A PET (Up Hatch Luck + Pick Up Egg)**\n' +
-                '> AFK Ride a Pet - Up Hatch Luck + Pick Up Egg\n\n' +
-                '**🥚 AUTO EVENT STEAL AN EGG**\n' +
-                '> AFK Auto Event Steal an Egg\n\n' +
-                '**🔒 PRIVATE SERVER RENTAL**\n' +
-                '> Sewa private server untuk AFK\n\n' +
-                '**🔄 REBIRTH (Grow a Chicken Fighter)**\n' +
-                '> Joki rebirth sesuai jumlah yang diinginkan\n\n' +
-                '**🎮 MAIN AKUN (Grow a Chicken Fighter)**\n' +
-                '> Mainin akun bebas request\n\n' +
+                '**🥚 JOKI BREAK & STEAL AN EGG**\n' +
+                '> Joki getok telur (khusus break egg, pet diambil sendiri oleh buyer)\n\n' +
+                '**🥚 JOKI AFK BREAK & STEAL AN EGG**\n' +
+                '> Treadmill + Steal Pet 1–10B/s\n\n' +
                 `> 📋 Lihat pricelist lengkap di <#${pricelistChannel.id}>`
             )
             .addFields(
@@ -190,34 +138,16 @@ module.exports = {
                     emoji: '🥚',
                 },
                 {
-                    label: 'Ride a Pet - Up Hatch Luck + Pick Up Egg',
-                    value: 'joki_rideapet_luck',
-                    description: 'AFK Ride a Pet - Up Hatch Luck + Pick Up Egg',
-                    emoji: '🐶',
-                },
-                {
-                    label: 'Auto Event Steal an Egg',
-                    value: 'joki_rideapet_luck_egg',
-                    description: 'AFK Auto Event Steal an Egg',
+                    label: 'Joki Break & Steal an Egg',
+                    value: 'joki_break_egg',
+                    description: 'Joki getok telur (khusus break egg, pet diambil buyer)',
                     emoji: '🥚',
                 },
                 {
-                    label: 'Private Server Rental',
-                    value: 'joki_private_server',
-                    description: 'Sewa private server untuk AFK',
-                    emoji: '🔒',
-                },
-                {
-                    label: 'Rebirth (Grow a Chicken Fighter)',
-                    value: 'joki_rebirth',
-                    description: 'Joki rebirth sesuai jumlah yang diinginkan',
-                    emoji: '🔄',
-                },
-                {
-                    label: 'Main Akun (Grow a Chicken Fighter)',
-                    value: 'joki_main_akun',
-                    description: 'Mainin akun bebas request',
-                    emoji: '🎮',
+                    label: 'Joki AFK Break & Steal an Egg',
+                    value: 'joki_afk_break_egg',
+                    description: 'Treadmill + Steal Pet 1–10B/s',
+                    emoji: '🥚',
                 },
             ]);
 
