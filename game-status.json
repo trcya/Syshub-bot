@@ -35,12 +35,13 @@
             "status": "unupdate"
         },
         {
-            "name": "Mine a Mountain",
-            "status": "unupdate"
+            "name": "steal from the rich",
+            "status": "discontinue",
+            "note": "Discontinue"
         },
         {
-            "name": "steal from the rich",
-            "status": "ready"
+            "name": "Mine a Mountain",
+            "status": "unupdate"
         },
         {
             "name": "break and steal an egg ",
