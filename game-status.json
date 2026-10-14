@@ -35,16 +35,19 @@
             "status": "unupdate"
         },
         {
-            "name": "steal from the rich",
-            "status": "discontinue",
-            "note": "Discontinue"
-        },
-        {
             "name": "Mine a Mountain",
             "status": "unupdate"
         },
         {
+            "name": "+1 Stone skipping ",
+            "status": "ready"
+        },
+        {
             "name": "break and steal an egg ",
+            "status": "ready"
+        },
+        {
+            "name": "steal from the rich",
             "status": "ready"
         },
         {
